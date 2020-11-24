@@ -13,7 +13,7 @@ START    ORG    $1000      ; first instruction of program
 OPMOVE EQU %00
 * NOP, MOVEM, LEA, NOT, JSR, RTS
 * 0 1 0 0 
-OPSPCIAL    EQU %0100
+OPSPECIAL    EQU %0100
 * ADDQ
 * 0 1 0 1
 OPADDQ  EQU %0101
@@ -50,10 +50,76 @@ IO:
 
 * start of OpCodes
 OPCODES:
-    ; decode opcode parts
-    JSR EFFECTIVEADDRESS
+    ; assume that current instruction we are reading is
+    ; pointed by A1
+    ; this is totally up to IO part, so it is subjected to change
+    ; for debugging purpose, imagine NOP is the current instruction we are reading
+    ; TODO: change A1 according to IO part
+    MOVE.W  #%0100111001110001, -(SP)
+    MOVEA.L SP, A1
     
-    RTS
+    ; start of decoding
+    
+    ; first two bits will decide if it's MOVE
+    ; %00 will indicate MOVE or other opcodes otherwise
+    MOVE.B  (A1), D5
+    AND.B #$C0, D5 ; extract 2 most significant bits out of 8 bits
+    CMP.B OPMOVE, D5 ; compare %00
+    BNE OPCODES_OTHERS ; skip to other opcodes
+    ; or continue to OPCODES_MOVE
+    
+OPCODES_MOVE: ; either MOVE or MOVEA
+    ; TODO: get size (%00?? part)
+    
+    ; pass to EA to handle address
+    ; MOVE or MOVEA will depend on the destination mode
+    
+    BRA OPCODES_END
+
+OPCODES_OTHERS: ; any other OPCODES
+    MOVE.B  (A1), D5
+    AND.B #$F0, D5 ; extract 4 most significant bits out of 8 bits
+    
+    CMP.B   OPSPECIAL, D5
+    BEQ OPCODES_SPECIAL
+    
+    CMP.B   OPADDQ, D5
+    BEQ OPCODES_ADDQ
+    
+    CMP.B   OPBRA, D5
+    BEQ OPCODES_BRA
+
+    CMP.B   OPMOVEQ, D5
+    BEQ OPCODES_MOVEQ
+    
+    ;TODO: add more opcodes
+    
+    ; if code doesn't match with any, it's an invalid opcode
+    BRA OPCODES_INVALID
+
+OPCODE_SPECIAL:
+
+    BRA OPCODES_END
+
+OPCODES_ADDQ:
+
+    BRA OPCODES_END
+    
+OPCODES_BRA:
+
+    BRA OPCODES_END
+    
+OPCODES_MOVEQ:
+
+    BRA OPCODES_END
+    
+OPCODES_INVALID:
+
+    BRA OPCODES_END
+
+OPCODES_END:
+    RTS ; return to IO
+    
 * end of OpCodes
 
 * start of EA
@@ -70,6 +136,7 @@ EFFECTIVEADDRESS:
 
 END:
     END    START        ; last line of source
+
 
 
 *~Font name~Courier New~
