@@ -97,7 +97,7 @@ OPCODES_OTHERS: ; any other OPCODES
     ; if code doesn't match with any, it's an invalid opcode
     BRA OPCODES_INVALID
 
-OPCODE_SPECIAL:
+OPCODES_SPECIAL:
 
     BRA OPCODES_END
 
