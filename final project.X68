@@ -120,7 +120,9 @@ OPCODES_BRA:
 OPCODES_MOVEQ:
 
     BRA OPCODES_END
-    
+
+; TODO: the rest of opcodes
+
 OPCODES_INVALID:
     ;TODO: prepare invalid Hex (in D5)
     BRA OPCODES_END
