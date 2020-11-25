@@ -56,14 +56,16 @@ OPCODES:
     ; for debugging purpose, imagine NOP is the current instruction we are reading
     ; TODO: change A1 according to IO part
     MOVE.W  #%0100111001110001, -(SP)
-    MOVEA.L SP, A1
+    MOVEA.L SP, A0
     
     ; start of decoding
     
     ; first two bits will decide if it's MOVE
     ; %00 will indicate MOVE or other opcodes otherwise
-    MOVE.B  (A1), D5
+    MOVE.B  (A0), D5
     AND.B #$C0, D5 ; extract 2 most significant bits out of 8 bits
+    LSR #6, D5 ; shift 6 bits right to get the actual value
+ 
     CMP.B OPMOVE, D5 ; compare %00
     BNE OPCODES_OTHERS ; skip to other opcodes
     ; or continue to OPCODES_MOVE
@@ -77,8 +79,9 @@ OPCODES_MOVE: ; either MOVE or MOVEA
     BRA OPCODES_END
 
 OPCODES_OTHERS: ; any other OPCODES
-    MOVE.B  (A1), D5
+    MOVE.B  (A0), D5
     AND.B #$F0, D5 ; extract 4 most significant bits out of 8 bits
+    LSR #4, D5 ;shift 4 bits right to get the actual value
     
     CMP.B   OPSPECIAL, D5
     BEQ OPCODES_SPECIAL
@@ -114,7 +117,7 @@ OPCODES_MOVEQ:
     BRA OPCODES_END
     
 OPCODES_INVALID:
-
+    ;TODO: prepare invalid Hex (in D5)
     BRA OPCODES_END
 
 OPCODES_END:
@@ -124,7 +127,11 @@ OPCODES_END:
 
 * start of EA
 EFFECTIVEADDRESS:
-    ; do some EA works...
+    ; for sake of example, size is fixed to WORD
+    ; and size will be stored in D7.B
+    ; lets say 1 is BYTE, 2 is WORD, and 3 is LONG. 0 otherwise
+    ; TODO: subject to change
+    MOVE.B  #2, D7
     RTS
 * end of EA
 
@@ -136,6 +143,7 @@ EFFECTIVEADDRESS:
 
 END:
     END    START        ; last line of source
+
 
 
 
