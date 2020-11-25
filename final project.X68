@@ -44,20 +44,25 @@ OPSHIFT EQU %1110
 
 * start of IO
 IO:
-    ; do some IO works...
+    ; assume that current instruction we are reading is
+    ; pointed by A0
+    ; this is totally up to IO part, so it is subjected to change
+    ; for debugging purpose, imagine NOP is the current instruction we are reading
+    MOVE.W  #%0100111001110001, -(SP)
+    MOVEA.L SP, A0
+    
     JSR OPCODES
 * end of IO
 
 * start of OpCodes
-OPCODES:
-    ; assume that current instruction we are reading is
-    ; pointed by A1
-    ; this is totally up to IO part, so it is subjected to change
-    ; for debugging purpose, imagine NOP is the current instruction we are reading
-    ; TODO: change A1 according to IO part
-    MOVE.W  #%0100111001110001, -(SP)
-    MOVEA.L SP, A0
-    
+
+*-----------------------------------------------------------
+* Decode OpCodes
+*
+* Preconditions:
+*   - A0 must be pointing to the beginning of the instruction
+*-----------------------------------------------------------
+OPCODES:    
     ; start of decoding
     
     ; first two bits will decide if it's MOVE
