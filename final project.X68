@@ -41,6 +41,8 @@ OPADD   EQU %1101
 * 1 1 1 0
 OPSHIFT EQU %1110
 
+;Reference number for OPCODE to EA
+opcodeRef  EQU  %00000000
 
 * start of program
 
