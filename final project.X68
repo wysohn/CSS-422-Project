@@ -76,7 +76,7 @@ OPCODES:
     AND.B #$C0, D5 ; extract 2 most significant bits out of 8 bits
     LSR.B #6, D5 ; shift 6 bits right to get the actual value
  
-    CMP.B OPMOVE, D5 ; compare %00
+    CMP.B #OPMOVE, D5 ; compare %00
     BNE OPCODES_OTHERS ; skip to other opcodes
     ; or continue to OPCODES_MOVE
     
@@ -93,16 +93,16 @@ OPCODES_OTHERS: ; any other OPCODES
     AND.B #$F0, D5 ; extract 4 most significant bits out of 8 bits
     LSR.B #4, D5 ;shift 4 bits right to get the actual value
     
-    CMP.B   OPSPECIAL, D5
+    CMP.B   #OPSPECIAL, D5
     BEQ OPCODES_SPECIAL
     
-    CMP.B   OPADDQ, D5
+    CMP.B   #OPADDQ, D5
     BEQ OPCODES_ADDQ
     
-    CMP.B   OPBRA, D5
+    CMP.B   #OPBRA, D5
     BEQ OPCODES_BRA
 
-    CMP.B   OPMOVEQ, D5
+    CMP.B   #OPMOVEQ, D5
     BEQ OPCODES_MOVEQ
     
     ;TODO: add more opcodes
@@ -215,6 +215,7 @@ EFFECTIVEADDRESS:
 
 END:
     END    START        ; last line of source
+
 
 
 
