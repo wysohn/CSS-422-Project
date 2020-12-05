@@ -7,6 +7,8 @@
 
 START    ORG    $1000      ; first instruction of program
 
+ALL_REG REG D0-D7/A0-A6
+
 ; Opcodes follow specific patterns
 * MOVE, MOVEA
 * 0 0 ? ?
@@ -64,12 +66,13 @@ IO:
 *-----------------------------------------------------------
 OPCODES:    
     ; start of decoding
+    MOVEM.L ALL_REG, -(SP) ; store current register state
     
     ; first two bits will decide if it's MOVE
     ; %00 will indicate MOVE or other opcodes otherwise
     MOVE.B  (A0), D5
     AND.B #$C0, D5 ; extract 2 most significant bits out of 8 bits
-    LSR #6, D5 ; shift 6 bits right to get the actual value
+    LSR.B #6, D5 ; shift 6 bits right to get the actual value
  
     CMP.B OPMOVE, D5 ; compare %00
     BNE OPCODES_OTHERS ; skip to other opcodes
@@ -86,7 +89,7 @@ OPCODES_MOVE: ; either MOVE or MOVEA
 OPCODES_OTHERS: ; any other OPCODES
     MOVE.B  (A0), D5
     AND.B #$F0, D5 ; extract 4 most significant bits out of 8 bits
-    LSR #4, D5 ;shift 4 bits right to get the actual value
+    LSR.B #4, D5 ;shift 4 bits right to get the actual value
     
     CMP.B   OPSPECIAL, D5
     BEQ OPCODES_SPECIAL
@@ -106,7 +109,11 @@ OPCODES_OTHERS: ; any other OPCODES
     BRA OPCODES_INVALID
 
 OPCODES_SPECIAL:
-
+    MOVE.W  (A0), D5
+    AND.W #$0FFF, D5 ; use 12 least significant bits
+    
+    CMP.W   #%111,  D5 ; NOP, JSR, or RTS
+    
     BRA OPCODES_END
 
 OPCODES_ADDQ:
@@ -128,6 +135,7 @@ OPCODES_INVALID:
     BRA OPCODES_END
 
 OPCODES_END:
+    MOVEM.L (SP)+, ALL_REG ; restore saved register state
     RTS ; return to IO
     
 * end of OpCodes
@@ -150,6 +158,7 @@ EFFECTIVEADDRESS:
 
 END:
     END    START        ; last line of source
+
 
 
 
