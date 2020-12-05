@@ -112,10 +112,53 @@ OPCODES_SPECIAL:
     MOVE.W  (A0), D5
     AND.W #$0FFF, D5 ; use 12 least significant bits
     
-    CMP.W   #%111,  D5 ; NOP, JSR, or RTS
+    MOVE.W  D5, D6
+    LSR.W   #1, D6
+    LSR.W   #8, D6 ; shift right 9 bits to get the 3 MSB
+    CMP.W   #%111,  D6 ; starts with 111 means NOP, JSR, or RTS
+    BEQ OPCODES_SPECIAL_NOPJSRRTS
+    
+    MOVE.W  D5, D6
+    LSR.W   #8, D6 ; shift right 8 bits to get the 4 MSB
+    AND.W   #$1, D6 ; to check if LEA, we only need to see if 4th bit is set
+    CMP.W   #%1,  D6 ; if 4th bit is set, it must be LEA 
+    BEQ OPCODES_SPECIAL_LEA
+    
+    MOVE.W  D5, D6
+    LSR.W   #3, D6
+    LSR.W   #8, D6 ; shift right 11 bits to get the 1 MSB
+    CMP.W   #%1, D6 ; if 1st bit is 1, it's MOVEM, or else, it's NOT
+    BEQ OPCODES_SPECIAL_MOVEM
+    
+    BRA OPCODES_SPECIAL_NOT
+    
+OPCODES_SPECIAL_NOPJSRRTS:
+    MOVE.W  D5, D6
+    LSR.W   #7, D6 ; shift right 7 bits to get 5 MSB
+    AND.W   #$1, D6 ; only need to see if 5th bit is set
+    CMP.W   #%1, D6 ; if it's set, it is JSR
+    BEQ OPCODES_SPECIAL_JSR
+    
+OPCODES_SPECIAL_NOP:
+    BRA OPCODES_END
+    
+OPCODES_SPECIAL_JSR:
+    BRA OPCODES_END
+    
+OPCODES_SPECIAL_RTS:
     
     BRA OPCODES_END
+    
+OPCODES_SPECIAL_LEA:
 
+    BRA OPCODES_END
+    
+OPCODES_SPECIAL_MOVEM:
+    BRA OPCODES_END
+
+OPCODES_SPECIAL_NOT:
+    BRA OPCODES_END
+    
 OPCODES_ADDQ:
 
     BRA OPCODES_END
