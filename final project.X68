@@ -139,6 +139,14 @@ OPCODES_SPECIAL_NOPJSRRTS:
     CMP.W   #%1, D6 ; if it's set, it is JSR
     BEQ OPCODES_SPECIAL_JSR
     
+    MOVE.W  D5, D6
+    LSR.W   #2, D6 ; shift right 2 bits to get 3rd LSB
+    AND.W   #$1, D6 ; only interested in last bit
+    CMP.W   #%1, D6 ; if it's set, it is RTS, or else, NOP
+    BEQ OPCODES_SPECIAL_RTS
+    
+    BRA OPCODES_SPECIAL_NOP
+    
 OPCODES_SPECIAL_NOP:
     BRA OPCODES_END
     
