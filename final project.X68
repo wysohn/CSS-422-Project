@@ -90,10 +90,12 @@ OPCODES_MOVE: ; either MOVE or MOVEA
     BEQ     OPCODES_MOVEA
     
     MOVE.L  #2, opcodeRef
+    JSR EFFECTIVEADDRESS
     BRA OPCODES_END
 
 OPCODES_MOVEA:
     MOVE.L  #3, opcodeRef
+    JSR EFFECTIVEADDRESS
     BRA OPCODES_END
 
 OPCODES_OTHERS: ; any other OPCODES
@@ -159,26 +161,32 @@ OPCODES_SPECIAL_NOPJSRRTS:
     
 OPCODES_SPECIAL_NOP:
     MOVE.L  #4, opcodeRef
+    JSR EFFECTIVEADDRESS
     BRA OPCODES_END
     
 OPCODES_SPECIAL_JSR:
     MOVE.L  #8, opcodeRef
+    JSR EFFECTIVEADDRESS
     BRA OPCODES_END
     
 OPCODES_SPECIAL_RTS:
     MOVE.L  #9, opcodeRef
+    JSR EFFECTIVEADDRESS
     BRA OPCODES_END
     
 OPCODES_SPECIAL_LEA:
     MOVE.L  #6, opcodeRef
+    JSR EFFECTIVEADDRESS
     BRA OPCODES_END
     
 OPCODES_SPECIAL_MOVEM:
     MOVE.L  #5, opcodeRef
+    JSR EFFECTIVEADDRESS
     BRA OPCODES_END
 
 OPCODES_SPECIAL_NOT:
     MOVE.L  #7, opcodeRef
+    JSR EFFECTIVEADDRESS
     BRA OPCODES_END
     
 OPCODES_ADDQ:
@@ -200,6 +208,9 @@ OPCODES_INVALID:
     BRA OPCODES_END
 
 OPCODES_END:
+    ; at this point, opcodeSize sould be ready
+    ; TODO: send OPCODE and EA to IO to print out
+    
     MOVEM.L (SP)+, ALL_REG ; restore saved register state
     RTS ; return to IO
     
@@ -211,7 +222,7 @@ EFFECTIVEADDRESS:
     ; and size will be stored in D7.B
     ; lets say 1 is BYTE, 2 is WORD, and 3 is LONG. 0 otherwise
     ; TODO: subject to change
-    MOVE.B  #2, D7
+    MOVE.B  #2, opcodeSize
     RTS
 * end of EA
 
@@ -220,6 +231,7 @@ EFFECTIVEADDRESS:
     SIMHALT             ; halt simulator
 
 * Put variables and constants here
+opcodeSize  DS.L    1
 
 END:
     END    START        ; last line of source
