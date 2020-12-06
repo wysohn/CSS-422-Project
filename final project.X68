@@ -81,17 +81,25 @@ OPCODES:
     ; or continue to OPCODES_MOVE
     
 OPCODES_MOVE: ; either MOVE or MOVEA
-    ; TODO: get size (%00?? part)
+    MOVE.W  (A0), D5
+    AND.W   #$0FFF, D5 ; use 12 least significant bits
+    LSR.W   #6, D6 ; shift right 6 bits to get 6 MSB
+    AND.W   #$0007, D6 ; interested only in last 3 bits
     
-    ; pass to EA to handle address
-    ; MOVE or MOVEA will depend on the destination mode
+    CMP.W   #%001,  D6 ; is dest mode 001? then it is MOVEA, or else, MOVE
+    BEQ     OPCODES_MOVEA
     
+    MOVE.L  #2, opcodeRef
+    BRA OPCODES_END
+
+OPCODES_MOVEA:
+    MOVE.L  #3, opcodeRef
     BRA OPCODES_END
 
 OPCODES_OTHERS: ; any other OPCODES
     MOVE.B  (A0), D5
-    AND.B #$F0, D5 ; extract 4 most significant bits out of 8 bits
-    LSR.B #4, D5 ;shift 4 bits right to get the actual value
+    AND.B   #$F0, D5 ; extract 4 most significant bits out of 8 bits
+    LSR.B   #4, D5 ;shift 4 bits right to get the actual value
     
     CMP.B   #OPSPECIAL, D5
     BEQ OPCODES_SPECIAL
@@ -215,6 +223,7 @@ EFFECTIVEADDRESS:
 
 END:
     END    START        ; last line of source
+
 
 
 
