@@ -195,7 +195,39 @@ OPCODES_ADDQ:
     BRA OPCODES_END
     
 OPCODES_BRA:
+    MOVE.W  (A0), D5
+    AND.W   #$0F00, D5 ; extract 5th, 6th, 7th, and 8th bits
+    LSR.W   #8, D5 ; shift 8 bits right to get the value
+    
+    CMP.W   #%1110, D5
+    BEQ OPCODES_BGT
+    
+    CMP.W   #%1111, D5
+    BEQ OPCODES_BLE
+    
+    CMP.W   #%0111, D5
+    BEQ OPCODES_BEQ
+    
+    CMP.W   #%0000, D5
+    BNE OPCODES_INVALID ; this is the last possible case, so if didn't match, then it's not a valid opcode.
+    
+    MOVE.L  #14, opcodeRef ; otherwise, it's BRA
+    JSR EFFECTIVEADDRESS
+    BRA OPCODES_END
+    
+OPCODES_BGT:
+    MOVE.L  #11, opcodeRef
+    JSR EFFECTIVEADDRESS
+    BRA OPCODES_END
+    
+OPCODES_BLE:
+    MOVE.L  #12, opcodeRef
+    JSR EFFECTIVEADDRESS
+    BRA OPCODES_END
 
+OPCODES_BEQ:
+    MOVE.L  #13, opcodeRef
+    JSR EFFECTIVEADDRESS
     BRA OPCODES_END
     
 OPCODES_MOVEQ:
