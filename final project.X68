@@ -59,6 +59,145 @@ OPCODES:
 * start of EA
 EFFECTIVEADDRESS:
     ; do some EA works...
+    EffectiveAddress:                  ; Starts EA section by comparing the opcodeRef Passed to figure out opcode EA to decode
+         MOVE.L #8,opcodeRef   ;for Testing opcodeRef entries
+         MOVE.L #1,D2          ;Counter for comparisons
+    
+         CMP.L  opcodeRef,D2           
+         BEQ    MoveMovea
+         ADDQ.B #1,D2
+    
+         CMP.L  opcodeRef,D2           
+         BEQ    MoveEA
+         ADDQ.B #1,D2
+    
+         CMP.L  opcodeRef,D2           
+         BEQ    MoveaEA
+         ADDQ.B #1,D2
+
+         CMP.L  opcodeRef,D2           
+         BEQ    NopEA
+         ADDQ.B #1,D2
+    
+         CMP.L  opcodeRef,D2           
+         BEQ    MovemEA
+         ADDQ.B #1,D2
+    
+         CMP.L  opcodeRef,D2           
+         BEQ    LeaEA
+         ADDQ.B #1,D2
+    
+         CMP.L  opcodeRef,D2           
+         BEQ    NotEA
+         ADDQ.B #1,D2
+    
+         CMP.L  opcodeRef,D2           
+         BEQ    JsrEA
+         ADDQ.B #1,D2
+    
+         CMP.L  opcodeRef,D2           
+         BEQ    RtsEA
+         ADDQ.B #1,D2
+    
+         CMP.L  opcodeRef,D2           
+         BEQ    AddqEA
+         ADDQ.B #1,D2
+    
+         CMP.L  opcodeRef,D2           
+         BEQ    BgtEA
+         ADDQ.B #1,D2
+
+         CMP.L  opcodeRef,D2           
+         BEQ    BleEA
+         ADDQ.B #1,D2
+    
+         CMP.L  opcodeRef,D2           
+         BEQ    BeqEA
+         ADDQ.B #1,D2
+    
+         CMP.L  opcodeRef,D2           
+         BEQ    BraEA
+         ADDQ.B #1,D2
+    
+         CMP.L  opcodeRef,D2           
+         BEQ    MoveqEA
+         ADDQ.B #1,D2
+    
+         CMP.L  opcodeRef,D2           ;First compare the opcode value to branch to proper EA decoding section
+         BEQ    OrEA
+         ADDQ.B #1,D2
+    
+         CMP.L  opcodeRef,D2           
+         BEQ    SubEA
+         ADDQ.B #1,D2
+    
+         CMP.L  opcodeRef,D2           
+         BEQ    AndEA
+         ADDQ.B #1,D2
+    
+         CMP.L  opcodeRef,D2           
+         BEQ    AddEA
+         ADDQ.B #1,D2
+    
+         CMP.L  opcodeRef,D2           
+         BEQ    AddaEA
+         ADDQ.B #1,D2
+         
+MoveMovea  
+
+MoveEA
+
+MoveaEA
+
+NopEA
+
+MovemEA
+
+LeaEA
+
+NotEA
+
+JsrEA    
+
+RtsEA
+
+AddqEA
+
+BgtEA
+
+BleEA    
+
+BeqEA
+
+BraEA
+
+MoveqEA
+
+OrEA     
+         
+SubEA   
+         
+AndEA    
+
+AddEA   
+
+AddaEA       
+         
+EndEA   
+        
+LslEA
+
+LrsEA
+
+AslEA
+
+AsrEA
+
+RolEA
+
+RorEA
+
+
     RTS
 * end of EA
 
