@@ -253,7 +253,15 @@ OPCODES_AND:
     BRA OPCODES_END
 
 OPCODES_ADD:
-    MOVE.L  #19, opcodeRef 
+    MOVE.W  (A0), D5
+    AND.W   #$0FFF, D5 ; use 12 least significant bits
+    LSR.W   #6, D6 ; shift right 6 bits to get 6 MSB
+    AND.W   #$0007, D6 ; interested only in last 3 bits
+    
+    CMP.W   #%001,  D6 ; is dest mode 001? then it is ADDA, or else, ADD
+    BEQ     OPCODES_ADDA
+    
+    MOVE.L  #19, opcodeRef
     JSR EFFECTIVEADDRESS
     BRA OPCODES_END
 
