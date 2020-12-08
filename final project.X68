@@ -271,12 +271,46 @@ OPCODES_ADDA:
     BRA OPCODES_END
     
 OPCODES_LSL:
-    MOVE.L  #21, opcodeRef 
+    MOVE.W  (A0), D5
+    AND.W   #$0F00, D5 ; extract 5th, 6th, 7th, and 8th bits
+    LSR.W   #8, D5 ; shift 8 bits right to get the value
+    
+    CMP.W   #%1, D5
+    BEQ OPCODES_LSR
+    
+    MOVE.W  (A0), D5
+    AND.W   #$0F00, D5 ; extract 5th, 6th, 7th, and 8th bits
+    LSR.W   #8, D5 ; shift 8 bits right to get the value
+    
+    CMP.W   #%00, D5
+    BEQ OPCODES_ASL
+    
+    CMP.W   #%11, D5
+    BEQ OPCODES_ROL
+    
+    CMP.W   #%10, D5
+    BNE OPCODES_INVALID ; this is the last possible case, so if didn't match, then it's not a valid opcode.
+    
+    MOVE.L  #21, opcodeRef ; otherwise, it's LSL
     JSR EFFECTIVEADDRESS
     BRA OPCODES_END
     
+    
 OPCODES_LSR:
-    MOVE.L  #22, opcodeRef 
+    MOVE.W  (A0), D5
+    AND.W   #$0F00, D5 ; extract 5th, 6th, 7th, and 8th bits
+    LSR.W   #8, D5 ; shift 8 bits right to get the value
+    
+    CMP.W   #%00, D5
+    BEQ OPCODES_ASR
+    
+    CMP.W   #%11, D5
+    BEQ OPCODES_ROR
+    
+    CMP.W   #%10, D5
+    BNE OPCODES_INVALID ; this is the last possible case, so if didn't match, then it's not a valid opcode.
+    
+    MOVE.L  #22, opcodeRef ; otherwise, it's LSR
     JSR EFFECTIVEADDRESS
     BRA OPCODES_END
     
