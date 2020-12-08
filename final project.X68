@@ -272,14 +272,14 @@ OPCODES_ADDA:
     
 OPCODES_LSL:
     MOVE.W  (A0), D5
-    AND.W   #$0F00, D5 ; extract 5th, 6th, 7th, and 8th bits
+    AND.W   #$0100, D5 ; extract 8th bit
     LSR.W   #8, D5 ; shift 8 bits right to get the value
     
     CMP.W   #%1, D5
     BEQ OPCODES_LSR
     
     MOVE.W  (A0), D5
-    AND.W   #$0F00, D5 ; extract 5th, 6th, 7th, and 8th bits
+    AND.W   #$0018, D5 ; extract 3th and 4th bits
     LSR.W   #12, D5 ; shift 12 bits right to get the value at index 3 and 4
     
     CMP.W   #%00, D5
@@ -298,7 +298,7 @@ OPCODES_LSL:
     
 OPCODES_LSR:
     MOVE.W  (A0), D5
-    AND.W   #$0F00, D5 ; extract 5th, 6th, 7th, and 8th bits
+    AND.W   #$0018, D5 ; extract 3th and 4th bits
     LSR.W   #12, D5 ; shift 12 bits right to get the value at index 3 and 4
     
     CMP.W   #%00, D5
