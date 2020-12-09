@@ -39,21 +39,9 @@ OPADD   EQU %1101
 * 1 1 1 0
 OPSHIFT EQU %1110
 
-
-* start of program
-
 * start of IO
 IO:
     ; do some IO works...
-    
-*-----------------------------------------------------------
-* Title      :I/O
-* Written by :Team Awesome
-* Date       :
-* Description:
-*-----------------------------------------------------------
-    ORG    $1000
-START:                  ; first instruction of program
 
 STARTING_ADDRESS_PROMPT
     
@@ -579,4 +567,4 @@ PRINTBUFFER         DC.L    0
 *~Font size~10~
 *~Tab type~1~
 *~Tab size~4~
-comments 
+
