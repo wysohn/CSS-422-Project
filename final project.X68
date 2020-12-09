@@ -312,6 +312,39 @@ OPCODES_SPECIAL_NOT_SIZES_END:
     
 OPCODES_ADDQ:
     MOVE.L  #10, opcodeRef 
+    BRA OPCODES_ADDQ_SIZES
+    
+OPCODES_ADDQ_SIZES:
+    MOVE.W  (A0), D5
+    AND.W   #$00C0, D5 ; 9th and 10th bits
+    LSR.W   #6, D5 ; shift right 6 bits to get the value
+    
+    CMP.W   #%00, D5
+    BEQ OPCODES_ADDQ_SIZES_B
+    
+    CMP.W   #%01, D5
+    BEQ OPCODES_ADDQ_SIZES_W
+    
+    CMP.W   #%10, D5
+    BEQ OPCODES_ADDQ_SIZES_L
+    
+    BRA OPCODES_INVALID
+
+OPCODES_ADDQ_SIZES_B:
+    MOVE.L  #1, D4
+    BRA OPCODES_ADDQ_SIZES_END
+    
+OPCODES_ADDQ_SIZES_W:
+    MOVE.L  #2, D4
+    BRA OPCODES_ADDQ_SIZES_END
+    
+OPCODES_ADDQ_SIZES_L:
+    MOVE.L  #3, D4
+    BRA OPCODES_ADDQ_SIZES_END
+
+OPCODES_ADDQ_SIZES_END:
+    LEA Name_Addq, A4
+    JSR IO_PRINT_OPCODES
     JSR EFFECTIVEADDRESS
     BRA OPCODES_END
     
@@ -506,6 +539,7 @@ Name_Moveq    DC.B    'MOVEQ',0
 
 END:
     END    START        ; last line of source
+
 
 
 
