@@ -202,45 +202,41 @@ OPCODES_SPECIAL_NOPJSRRTS:
     BRA OPCODES_SPECIAL_NOP
     
 OPCODES_SPECIAL_NOP:
-    MOVE.L  #4, opcodeRef
-    
     MOVE.L  #0, D4
     LEA Name_Nop, A4
     JSR IO_PRINT_OPCODES
     
+    MOVE.L  #4, opcodeRef
     JSR EFFECTIVEADDRESS
     
     BRA OPCODES_END
     
 OPCODES_SPECIAL_JSR:
-    MOVE.L  #8, opcodeRef
-        
     MOVE.L  #0, D4
     LEA Name_Jsr, A4
     JSR IO_PRINT_OPCODES
     
+    MOVE.L  #8, opcodeRef
     JSR EFFECTIVEADDRESS
     
     BRA OPCODES_END
     
 OPCODES_SPECIAL_RTS:
-    MOVE.L  #9, opcodeRef
-    
     MOVE.L  #0, D4
     LEA Name_Rts, A4
     JSR IO_PRINT_OPCODES
     
+    MOVE.L  #9, opcodeRef
     JSR EFFECTIVEADDRESS
     
     BRA OPCODES_END
     
 OPCODES_SPECIAL_LEA:
-    MOVE.L  #6, opcodeRef
-    
     MOVE.L  #3, D4
     LEA Name_Lea, A4
     JSR IO_PRINT_OPCODES
     
+    MOVE.L  #6, opcodeRef
     JSR EFFECTIVEADDRESS
     
     BRA OPCODES_END
