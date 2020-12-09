@@ -316,7 +316,8 @@ OPCODES_LSL:
     
     MOVE.W  (A0), D5
     AND.W   #$0018, D5 ; extract 3th and 4th bits
-    LSR.W   #12, D5 ; shift 12 bits right to get the value at index 3 and 4
+    LSR.W   #4, D5 ; shift 4 bits right to get the value at index 3 and 4
+    LSR.W   #8, D5 ; shift 8 bits right to get the value at index 3 and 4
     
     CMP.W   #%00, D5
     BEQ OPCODES_ASL
@@ -335,7 +336,8 @@ OPCODES_LSL:
 OPCODES_LSR:
     MOVE.W  (A0), D5
     AND.W   #$0018, D5 ; extract 3th and 4th bits
-    LSR.W   #12, D5 ; shift 12 bits right to get the value at index 3 and 4
+    LSR.W   #4, D5 ; shift 4 bits right to get the value at index 3 and 4
+    LSR.W   #8, D5 ; shift 8 bits right to get the value at index 3 and 4
     
     CMP.W   #%00, D5
     BEQ OPCODES_ASR
