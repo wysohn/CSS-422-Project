@@ -99,10 +99,12 @@ OPCODES_MOVE: ; either MOVE or MOVEA
     BEQ     OPCODES_MOVEA
     
     MOVE.L  #2, opcodeRef
+    LEA Name_Move, A4
     BRA OPCODES_MOVE_SIZES
 
 OPCODES_MOVEA:
     MOVE.L  #3, opcodeRef
+    LEA Name_Movea, A4
     BRA OPCODES_MOVE_SIZES
     
 OPCODES_MOVE_SIZES:
@@ -134,7 +136,6 @@ OPCODES_MOVE_SIZES_L:
     BRA OPCODES_MOVE_SIZES_END
 
 OPCODES_MOVE_SIZES_END:
-    LEA Name_Move, A4
     JSR IO_PRINT_OPCODES ; A4 pointing to the op name, D4 contains op size
     JSR EFFECTIVEADDRESS
     BRA OPCODES_END
