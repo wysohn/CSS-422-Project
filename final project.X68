@@ -365,26 +365,46 @@ OPCODES_BRA:
     CMP.W   #%0000, D5
     BNE OPCODES_INVALID ; this is the last possible case, so if didn't match, then it's not a valid opcode.
     
+    MOVE.L  #0, D4
+    LEA Name_Bra, A4
+    JSR IO_PRINT_OPCODES
+    
     MOVE.L  #14, opcodeRef ; otherwise, it's BRA
     JSR EFFECTIVEADDRESS
     BRA OPCODES_END
     
 OPCODES_BGT:
+    MOVE.L  #0, D4
+    LEA Name_Bgt, A4
+    JSR IO_PRINT_OPCODES
+    
     MOVE.L  #11, opcodeRef
     JSR EFFECTIVEADDRESS
     BRA OPCODES_END
     
 OPCODES_BLE:
+    MOVE.L  #0, D4
+    LEA Name_Ble, A4
+    JSR IO_PRINT_OPCODES
+    
     MOVE.L  #12, opcodeRef
     JSR EFFECTIVEADDRESS
     BRA OPCODES_END
 
 OPCODES_BEQ:
+    MOVE.L  #0, D4
+    LEA Name_Beq, A4
+    JSR IO_PRINT_OPCODES
+    
     MOVE.L  #13, opcodeRef
     JSR EFFECTIVEADDRESS
     BRA OPCODES_END
     
 OPCODES_MOVEQ:
+    MOVE.L  #3, D4
+    LEA Name_Moveq, A4
+    JSR IO_PRINT_OPCODES
+    
     MOVE.L  #15, opcodeRef 
     JSR EFFECTIVEADDRESS
     BRA OPCODES_END
