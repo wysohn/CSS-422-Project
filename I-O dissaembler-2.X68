@@ -192,7 +192,7 @@ DISASSEMBLE
     *BGT     START
     MOVE.L  PRINTBUFFER,A1
     LEA     ADDRESS_INCREMENTER,A6
-    JSR     IS_NOP_OR_RTS   *Checking if NOP or RTS first 
+    JSR     IS_NOP_OR_RTS   *Checking if NOP or RTS first before rest of the opcodes?
 
     
 PRINT_ADDRESS               *****PRINTS the memory address the instruction is at********
