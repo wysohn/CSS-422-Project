@@ -203,31 +203,110 @@ OPCODES_SPECIAL_NOPJSRRTS:
     
 OPCODES_SPECIAL_NOP:
     MOVE.L  #4, opcodeRef
+    
+    MOVE.L  #0, D4
+    LEA Name_Nop, A4
+    JSR IO_PRINT_OPCODES
+    
     JSR EFFECTIVEADDRESS
+    
     BRA OPCODES_END
     
 OPCODES_SPECIAL_JSR:
     MOVE.L  #8, opcodeRef
+        
+    MOVE.L  #0, D4
+    LEA Name_Jsr, A4
+    JSR IO_PRINT_OPCODES
+    
     JSR EFFECTIVEADDRESS
+    
     BRA OPCODES_END
     
 OPCODES_SPECIAL_RTS:
     MOVE.L  #9, opcodeRef
+    
+    MOVE.L  #0, D4
+    LEA Name_Rts, A4
+    JSR IO_PRINT_OPCODES
+    
     JSR EFFECTIVEADDRESS
+    
     BRA OPCODES_END
     
 OPCODES_SPECIAL_LEA:
     MOVE.L  #6, opcodeRef
+    
+    MOVE.L  #3, D4
+    LEA Name_Lea, A4
+    JSR IO_PRINT_OPCODES
+    
     JSR EFFECTIVEADDRESS
+    
     BRA OPCODES_END
     
 OPCODES_SPECIAL_MOVEM:
     MOVE.L  #5, opcodeRef
+    BRA OPCODES_SPECIAL_MOVEM_SIZES
+
+OPCODES_SPECIAL_MOVEM_SIZES:
+    MOVE.W  (A0), D5
+    AND.W   #$0040, D5 ; 10th bit
+    LSR.W   #6, D5 ; shift right 6 bits to get the value
+    
+    CMP.W   #0, D5
+    BEQ OPCODES_SPECIAL_MOVEM_SIZES_W
+    
+    ; it's either 0 or 1, so no invalid case
+    BRA OPCODES_SPECIAL_MOVEM_SIZES_L
+
+OPCODES_SPECIAL_MOVEM_SIZES_W:
+    MOVE.L  #2, D4
+    BRA OPCODES_SPECIAL_MOVEM_SIZES_END
+
+OPCODES_SPECIAL_MOVEM_SIZES_L:
+    MOVE.L  #3, D4
+    BRA OPCODES_SPECIAL_MOVEM_SIZES_END
+    
+OPCODES_SPECIAL_MOVEM_SIZES_END:
+    LEA Name_Movem, A4
+    JSR IO_PRINT_OPCODES
     JSR EFFECTIVEADDRESS
     BRA OPCODES_END
 
 OPCODES_SPECIAL_NOT:
     MOVE.L  #7, opcodeRef
+    
+    MOVE.W  (A0), D5
+    AND.W   #$00C0, D5 ; 9th and 10th bits
+    LSR.W   #6, D5 ; shift right 6 bits to get the value
+    
+    CMP.W   #%00, D5
+    BEQ OPCODES_SPECIAL_NOT_SIZES_B
+    
+    CMP.W   #%01, D5
+    BEQ OPCODES_SPECIAL_NOT_SIZES_W
+    
+    CMP.W   #%10, D5
+    BEQ OPCODES_SPECIAL_NOT_SIZES_L
+    
+    BRA OPCODES_INVALID
+   
+OPCODES_SPECIAL_NOT_SIZES_B:
+    MOVE.L  #1, D4
+    BRA OPCODES_SPECIAL_NOT_SIZES_END
+ 
+OPCODES_SPECIAL_NOT_SIZES_W:
+    MOVE.L  #2, D4
+    BRA OPCODES_SPECIAL_NOT_SIZES_END
+
+OPCODES_SPECIAL_NOT_SIZES_L:
+    MOVE.L  #3, D4
+    BRA OPCODES_SPECIAL_NOT_SIZES_END
+
+OPCODES_SPECIAL_NOT_SIZES_END:
+    LEA Name_Not, A4
+    JSR IO_PRINT_OPCODES
     JSR EFFECTIVEADDRESS
     BRA OPCODES_END
     
@@ -409,6 +488,19 @@ opcodeSize  DS.L    1
 
 Name_Move   DC.B    'MOVE',0
 Name_Movea  DC.B    'MOVEA',0
+Name_Nop    DC.B    'NOP',0
+Name_Movem    DC.B    'MOVEM',0
+Name_Lea    DC.B    'LEA',0
+Name_Not    DC.B    'NOT',0
+Name_Jsr    DC.B    'JSR',0
+Name_Rts    DC.B    'RTS',0
+Name_Addq    DC.B    'ADDQ',0
+Name_Bgt    DC.B    'BGT',0
+Name_Ble    DC.B    'BLE',0
+Name_Beq    DC.B    'BEQ',0
+Name_Bra    DC.B    'BRA',0
+Name_Moveq    DC.B    'MOVEQ',0
+;Name_    DC.B    '',0 for copypasta
 
 END:
     END    START        ; last line of source
