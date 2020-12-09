@@ -56,6 +56,10 @@ IO:
     MOVEA.L SP, A0
     
     JSR OPCODES
+    
+IO_PRINT_OPCODES:
+    ; TODO: something...
+    RTS
 * end of IO
 
 * start of OpCodes
@@ -95,6 +99,39 @@ OPCODES_MOVE: ; either MOVE or MOVEA
 
 OPCODES_MOVEA:
     MOVE.L  #3, opcodeRef
+    BRA OPCODES_MOVE_SIZES
+    
+OPCODES_MOVE_SIZES:
+    MOVE.B  (A0), D5
+    AND.B   #$30, D5 ; use 3rd and 4th bits
+    LSR.B   #4, D5 ; shift right 4 bits to get the value
+    
+    CMP.B   #%01, D5 ; Byte
+    BEQ OPCODES_MOVE_SIZES_B
+    
+    CMP.B   #%11, D5 ; Word
+    BEQ OPCODES_MOVE_SIZES_W
+    
+    CMP.B   #%10, D5 ; Long
+    BEQ OPCODES_MOVE_SIZES_L
+    
+    BRA OPCODES_INVALID ; invalid size
+
+OPCODES_MOVE_SIZES_B:
+    MOVE.L  #1, D4
+    BRA OPCODES_MOVE_SIZES_END
+
+OPCODES_MOVE_SIZES_W:
+    MOVE.L  #2, D4
+    BRA OPCODES_MOVE_SIZES_END
+
+OPCODES_MOVE_SIZES_L:
+    MOVE.L  #3, D4
+    BRA OPCODES_MOVE_SIZES_END
+
+OPCODES_MOVE_SIZES_END:
+    LEA Name_Move, A4
+    JSR IO_PRINT_OPCODES ; A4 pointing to the op name, D4 contains op size
     JSR EFFECTIVEADDRESS
     BRA OPCODES_END
 
@@ -365,8 +402,12 @@ EFFECTIVEADDRESS:
 * Put variables and constants here
 opcodeSize  DS.L    1
 
+Name_Move   DC.B    'MOVE',0
+Name_Movea  DC.B    'MOVEA',0
+
 END:
     END    START        ; last line of source
+
 
 
 
