@@ -56,7 +56,12 @@ IO:
     MOVEA.L SP, A0
     
     JSR OPCODES
-    
+
+*-----------------------------------------------------------
+* Preconditions:
+*   - A4 pointing to the opcode name (null terminated string)
+*   - D4 contains size (0 for ignore, 1 for Byte, 2 for Word, 3 for Long
+*-----------------------------------------------------------
 IO_PRINT_OPCODES:
     ; TODO: something...
     RTS
@@ -406,6 +411,7 @@ Name_Movea  DC.B    'MOVEA',0
 
 END:
     END    START        ; last line of source
+
 
 
 
