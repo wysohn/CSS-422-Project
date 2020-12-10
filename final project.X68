@@ -153,6 +153,21 @@ OPCODES_OTHERS: ; any other OPCODES
     
     ;TODO: add more opcodes
     
+    CMP.B   #OPOR, D5
+    BEQ OPCODES_MOVEQ
+    
+    CMP.B   #OPSUB, D5
+    BEQ OPCODES_MOVEQ
+    
+    CMP.B   #OPAND, D5
+    BEQ OPCODES_MOVEQ
+    
+    CMP.B   #OPADD, D5
+    BEQ OPCODES_MOVEQ
+    
+    CMP.B   #OPSHIFT, D5
+    BEQ OPCODES_MOVEQ
+    
     ; if code doesn't match with any, it's an invalid opcode
     BRA OPCODES_INVALID
 
