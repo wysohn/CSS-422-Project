@@ -627,26 +627,10 @@ sec4posEndAn   LEA     parPosEnd,A1
             TRAP    #15
             BRA     end ;remeber bitcount for i/o
             
-sec4EA     MOVE.B #32,D2  ;Merge these two sections of moving data, then just move word for word and move long for long
-           MOVE.L #$00000000,D1
-           MOVEA A0,A3
-           ADDA #16,A3
-           MOVE.L (A3),D3
- 
-sec4WordLoop LSL.L #1,D3    
-             BCS   sec4WordLoop1
-             LSL.L  #1,D1
-     
-             ADDQ.B #1,D2
-             CMP.B  #33,D2
-             BEQ   sec4addval
-             BRA   sec4WordLoop 
-sec4WordLoop1 LSL.L  #1,D1
-              ADD.B #%1,D1
-              ADDQ.B #1,D2
-              CMP.B  #33,D2
-              BEQ   sec4addval
-              BRA   sec4WordLoop
+sec4EA     MOVE.L #$00000000,D2
+           MOVEA A0,A5
+           ADDA #16,A5
+           MOVE.L (A5),D3
 
 
 sec4addval   CMP.B #%000,D7
@@ -654,10 +638,11 @@ sec4addval   CMP.B #%000,D7
             CMP.B #%001,D7
             BEQ   sec4Long
             BRA   printError
-sec4Word    MOVE.W (A3),D2  ;ask about******************
+sec4Word    MOVE.W (A5),D2  ;ask about******************
             BRA    sec4Print
 
-sec4Long    MOVE.L  (A3),D2 
+sec4Long    MOVE.L  (A5),D2
+            MOVE.W #32,numberBits 
 
 sec4Print   LEA     money,A1 
             MOVE.B  #14,D0
