@@ -307,26 +307,26 @@ OPCODES_ADDA:
     BRA OPCODES_END
     
 OPCODES_ADD_SIZES: ; all of the or,sub,and,add,adda
-    MOVE.B  (A0), D5
-    AND.B   #$1C, D5 ; use 4th, 5th and 6th bits
-    LSR.B   #4, D5 ; shift right 4 bits to get the value
+    MOVE.L  (A0), D5
+    AND.L   #$01C0, D5 ; use 8th, 9th and 10th bits
+    LSR.L   #6, D5 ; shift right 6 bits to get the value
     
-    CMP.B   #%000, D5 ; Byte
+    CMP.L   #%000, D5 ; Byte
     BEQ OPCODES_ADD_SIZES_B
     
-    CMP.B   #%100, D5 ; Byte
+    CMP.L   #%100, D5 ; Byte
     BEQ OPCODES_ADD_SIZES_B
     
-    CMP.B   #%001, D5 ; Word
+    CMP.L   #%001, D5 ; Word
     BEQ OPCODES_ADD_SIZES_W
     
-    CMP.B   #%101, D5 ; Word
+    CMP.L   #%101, D5 ; Word
     BEQ OPCODES_ADD_SIZES_W
     
-    CMP.B   #%110, D5 ; Long
+    CMP.L   #%110, D5 ; Long
     BEQ OPCODES_ADD_SIZES_L
     
-    CMP.B   #%010, D5 ; Long
+    CMP.L   #%010, D5 ; Long
     BEQ OPCODES_ADD_SIZES_L
     
     BRA OPCODES_INVALID ; invalid size
@@ -416,17 +416,17 @@ OPCODES_ROR:
     BRA OPCODES_END
     
 OPCODES_SHIFTING_SIZES: ; all of the lsl,lsr,asl,asr,rol,ror
-    MOVE.B  (A0), D5
-    AND.B   #$C0, D5 ; use 3rd and 4th bits
-    LSR.B   #4, D5 ; shift right 4 bits to get the value
+    MOVE.L  (A0), D5
+    AND.L   #$00C0, D5 ; use 3rd and 4th bits
+    LSR.L   #5, D5 ; shift right 4 bits to get the value
     
-    CMP.B   #%01, D5 ; Byte
+    CMP.L   #%00, D5 ; Byte
     BEQ OPCODES_SHIFTING_SIZES_B
     
-    CMP.B   #%11, D5 ; Word
+    CMP.L   #%01, D5 ; Word
     BEQ OPCODES_SHIFTING_SIZES_W
     
-    CMP.B   #%10, D5 ; Long
+    CMP.L   #%10, D5 ; Long
     BEQ OPCODES_SHIFTING_SIZES_L
     
     BRA OPCODES_INVALID ; invalid size
