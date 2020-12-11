@@ -60,18 +60,12 @@ OPCODES:
 EFFECTIVEADDRESS:
     ; do some EA works...
     EffectiveAddress:                  ; Starts EA section by comparing the opcodeRef Passed to figure out opcode EA to decode
-        ; MOVE.L #$AAAA,D2
-         
-         ;MOVE.B #%001,D1
-        ; MOVE.B #%111,D7
-         ;JSR    printEA
+
+        
          MOVE.L (A0),D3
-         MOVEA A0,A5 ;Used for print(xxx).L/(xxx).W/#Immediates
-         MOVE.L #21,opcodeRef   ;for Testing opcodeRef entries
          MOVE.L #1,D2          ;Counter for comparisons
          ADD.B #16,numberBits
-        
-           
+
          
          CMP.L  opcodeRef,D2           
          BEQ    MoveMovea
@@ -708,7 +702,7 @@ sec1Loop3 LSL.L  #1,D5
 resetsetD21 MOVE.B #$01,D2
 
 sec1Loop4 LSL.L #1,D3    ;gets destination mode in D6
-         BCS   sec3Loop5
+         BCS   sec1Loop5
          LSL.L  #1,D6
      
          ADDQ.B #1,D2
@@ -726,9 +720,9 @@ sec1Loop5 LSL.L  #1,D6
 
 resetsetsetD21 MOVE.B #$01,D2
 
-sec1Loop6 LSL.L #1,D3    ;gets ea source mode stores it in D7
+sec1Loop6 LSL.L #1,D3    ;gets ea source mode stores it in D1
          BCS   sec1Loop7
-         LSL.L  #1,D7
+         LSL.L  #1,D1
      
          ADDQ.B #1,D2
          CMP.B  #4,D2
@@ -736,8 +730,8 @@ sec1Loop6 LSL.L #1,D3    ;gets ea source mode stores it in D7
          BRA   sec1Loop6
          
  
-sec1Loop7 LSL.L  #1,D7
-         ADD.B #%1,D7
+sec1Loop7 LSL.L  #1,D1
+         ADD.B #%1,D1
          ADDQ.B #1,D2
          CMP.B  #4,D2
          BEQ   resetsetsetsetD21
@@ -746,9 +740,9 @@ sec1Loop7 LSL.L  #1,D7
          
 resetsetsetsetD21 MOVE.B #$01,D2
 
-sec1Loop8 LSL.L #1,D3    ;gets ea source register stores it in D1
+sec1Loop8 LSL.L #1,D3    ;gets ea source register stores it in D7
          BCS   sec1Loop9
-         LSL.L  #1,D1
+         LSL.L  #1,D7
      
          ADDQ.B #1,D2
          CMP.B  #4,D2
@@ -756,8 +750,8 @@ sec1Loop8 LSL.L #1,D3    ;gets ea source register stores it in D1
          BRA   sec1Loop8
          
  
-sec1Loop9 LSL.L  #1,D1
-         ADD.B #%1,D1
+sec1Loop9 LSL.L  #1,D7
+         ADD.B #%1,D7
          ADDQ.B #1,D2
          CMP.B  #4,D2
          BEQ   nextSec1
@@ -772,7 +766,7 @@ nextSec1  CMP.B #%001,D6
 MoveEA    LEA     MOVEE,A1 
           MOVE.B  #14,D0
           TRAP    #15
-          CMP.B  #%00,D4
+          CMP.B  #%01,D4
           BEQ    moveB
           CMP.B  #%11,D4
           BEQ    moveW
@@ -782,25 +776,153 @@ moveL     LEA     longOp,A1
           MOVE.B  #14,D0
           TRAP    #15
           MOVE.B D4,(A6)
+          BRA     printMove
 moveW     LEA     wordOp,A1 
           MOVE.B  #14,D0
           TRAP    #15
           MOVE.B D4,(A6)
+          BRA     printMove
 moveB     LEA     byteOp,A1 
           MOVE.B  #14,D0
           TRAP    #15    
           MOVE.B D4,(A6)
 
+printMove JSR     printEA
+          LEA     comma,A1 
+          MOVE.B  #14,D0
+          TRAP    #15  
+          
+          MOVE.L  D6,D1 ;sets up next printEA call with destination data
+          MOVE.L  D5,D7
+          CMP.B   #%111,D6
+          BEQ     checkIm
+          JSR     printEA
+          BRA     end
+          
+checkIm   CMP.B  #%100,D7
+          BEQ    printError
+          JSR    printEA 
+          BRA    end       
+
 MoveaEA   LEA     MOVEA,A1 
           MOVE.B  #14,D0
           TRAP    #15
+          CMP.B  #%11,D4
+          BEQ    moveWa
+          CMP.B  #%10,D4
+          BEQ    moveLa
+moveLa     LEA     longOp,A1 
+          MOVE.B  #14,D0
+          TRAP    #15
+          MOVE.B D4,(A6)
+          BRA     printMovea
+moveWa    LEA     wordOp,A1 
+          MOVE.B  #14,D0
+          TRAP    #15
+          MOVE.B D4,(A6)
+          BRA     printMovea
           
+printMovea JSR     printEA
+          LEA     comma,A1 
+          MOVE.B  #14,D0
+          TRAP    #15  
+          
+          MOVE.L  D6,D1 ;sets up next printEA call with destination data
+          MOVE.L  D5,D7
+          JSR     printEA
+          BRA     end          
 
 NopEA    BRA end
 
 MovemEA
 
-LeaEA
+LeaEA    LSL.L #4,D3   ;gets rid of first 4 bits
+         MOVE.L #1,D2
+         
+LeaLoop  LSL.L #1,D3    ;gets destination An reg# and stores it in D4
+         BCS   LeaLoop1
+         LSL.L  #1,D4
+     
+         ADDQ.B #1,D2
+         CMP.B  #4,D2
+         BEQ   resetLD2
+         BRA   LeaLoop
+         
+ 
+LeaLoop1 LSL.L  #1,D4
+         ADD.B #%1,D4
+         ADDQ.B #1,D2
+         CMP.B  #4,D2
+         BEQ   resetLD2
+         BRA   LeaLoop
+
+resetLD2 MOVE.B #$01,D2
+
+LeaLoop2 LSL.L #1,D3    ;gets number to check for error it in D5. should be %111
+         BCS   LeaLoop3
+         LSL.L  #1,D5
+     
+         ADDQ.B #1,D2
+         CMP.B  #4,D2
+         BEQ   resetsetLD2
+         BRA   LeaLoop2
+         
+ 
+LeaLoop3 LSL.L  #1,D5
+         ADD.B #%1,D5
+         ADDQ.B #1,D2
+         CMP.B  #4,D2
+         BEQ   resetsetLD2
+         BRA   LeaLoop2
+         
+resetsetLD2 MOVE.B #$01,D2
+
+LeaLoop4 LSL.L #1,D3    ;gets ea mode and stores it in D1
+         BCS   LeaLoop5
+         LSL.L  #1,D1
+     
+         ADDQ.B #1,D2
+         CMP.B  #4,D2
+         BEQ   resetsetsetLD2
+         BRA   LeaLoop4
+         
+ 
+LeaLoop5 LSL.L  #1,D1
+         ADD.B #%1,D1
+         ADDQ.B #1,D2
+         CMP.B  #4,D2
+         BEQ   resetsetsetLD2
+         BRA   LeaLoop4
+
+resetsetsetLD2 MOVE.B #$01,D2
+
+LeaLoop6 LSL.L #1,D3    ;gets ea register stores it in D7
+         BCS   LeaLoop7
+         LSL.L  #1,D7
+     
+         ADDQ.B #1,D2
+         CMP.B  #4,D2
+         BEQ   nextSec3
+         BRA   LeaLoop6
+         
+ 
+LeaLoop7 LSL.L  #1,D7
+         ADD.B #%1,D7
+         ADDQ.B #1,D2
+         CMP.B  #4,D2
+         BEQ   LeaCheck
+         BRA   LeaLoop6
+
+LeaCheck CMP.B #%111,D5
+         BEQ   LeaTest1
+         BRA   printError
+LeaTest1 CMP.B #%010,D1
+         BEQ   LeaPrint
+         CMP.B #%111,D1
+         BEQ   LeaTest2 
+         BRA   printError       
+LeaTest2 ;Currently working on---------------------------
+LeaPrint
 
 NotEA
 
@@ -919,28 +1041,28 @@ printEA     MOVE.L #$00000000,D2
             BEQ   printOtherEA
 
 printDn     CMP.B #%000,D7
-      BEQ   DnSrc0
+      BEQ   printDn0
       CMP.B #%001,D7
-      BEQ   DnSrc1
+      BEQ   printDn1
       CMP.B #%010,D7
-      BEQ   DnSrc2
+      BEQ   printDn2
       CMP.B #%011,D7
-      BEQ   DnSrc3
+      BEQ   printDn3
       CMP.B #%100,D7
-      BEQ   DnSrc4
+      BEQ   printDn4
       CMP.B #%101,D7
-      BEQ   DnSrc5
+      BEQ   printDn5
       CMP.B #%110,D7
-      BEQ   DnSrc6
+      BEQ   printDn6
       CMP.B #%111,D7
-      BEQ   DnSrc7
+      BEQ   printDn7
 
 
 printDn0 LEA     Dn0,A1 
       MOVE.B  #14,D0
       TRAP    #15
       RTS
-ptintDn1 LEA     Dn1,A1 
+printDn1 LEA     Dn1,A1 
       MOVE.B  #14,D0
       TRAP    #15
       RTS
@@ -1029,16 +1151,15 @@ printA7      LEA     An7,A1
             TRAP    #15
             BRA     parEndprint   
             
-parEndprint CMP.B #001,D1    ;just An
-            RTS
-            CMP.B #%010,D1  ;Normal (An)
+parEndprint CMP.B #%010,D1  ;Normal (An)
             BEQ   parEndAn
             CMP.B #%011,D1  ;(An)+
             BEQ   posEndAn 
             CMP.B #%100,D1  ;-(An)
             BEQ   parEndAn
-            
-parEndAn   LEA     parEnd,A1 
+            CMP.B #001,D1    ;just An
+            RTS
+parEndAn       LEA     parEnd,A1 
                MOVE.B  #14,D0
                TRAP    #15
                RTS
@@ -1128,12 +1249,15 @@ imLong      MOVE.L (A5),D2
 printError LEA     errorM,A1 
            MOVE.B  #14,D0
            TRAP    #15
-           BRA     end
+           BRA   end
 
 end   LEA     EndBRA,A1 
       MOVE.B  #14,D0
       TRAP    #15
       RTS
+
+
+
 
 * end of EA
 
@@ -1142,6 +1266,53 @@ end   LEA     EndBRA,A1
     SIMHALT             ; halt simulator
 
 * Put variables and constants here
+errorM  DC.B 'Address Mode Error',CR,LF,0
+EndBRA  DC.B 'End',CR,LF,0
+Dn0     DC.B 'D0',0
+Dn1     DC.B 'D1',0
+Dn2     DC.B 'D2',0
+Dn3     DC.B 'D3',0
+Dn4     DC.B 'D4',0
+Dn5     DC.B 'D5',0
+Dn6     DC.B 'D6',0
+Dn7     DC.B 'D7',0
+
+An0     DC.B 'A0',0
+An1     DC.B 'A1',0
+An2     DC.B 'A2',0
+An3     DC.B 'A3',0
+An4     DC.B 'A4',0
+An5     DC.B 'A5',0
+An6     DC.B 'A6',0
+An7     DC.B 'A7',0
+
+parNegStart DC.B '-(',0
+parStart    DC.B '(',0
+parPosEnd DC.B ')+',0
+parEnd   DC.B ')',0
+
+
+p00          DC.B '#8',0
+p0           DC.B '#0',0
+p1          DC.B '#1',0
+p2          DC.B '#2',0
+p3          DC.B '#3',0
+p4          DC.B '#4',0
+p5          DC.B '#5',0
+p6          DC.B '#6',0
+p7          DC.B '#7',0
+
+comma      DC.B ',',0
+pound      DC.B '#',0
+money      DC.B '$',0
+both       DC.B '#$',0
+
+MOVEE      DC.B 'MOVE',0
+MOVEA      DC.B 'MOVEA',0
+
+longOp     DC.B '.L ',0
+wordOp     DC.B '.W ',0
+byteOp     DC.B '.B ',0
 
 END:
     END    START        ; last line of source
