@@ -508,11 +508,11 @@ OPCODES_ROR:
 
 OPCODES_INVALID:  
     LEA Name_RawInvalid, A4
-    MOVE.B  #0, D0 ; first byte
+    MOVE.L  #0, D0 ; first byte
     JSR PUTHEX
     
     ADDA.L  #2, A4 ; move to the next location
-    MOVE.B  #1, D0 ; second byte
+    MOVE.L  #1, D0 ; second byte
     JSR PUTHEX
     
     ADDA.L  #2, A4 ; move to the next location
@@ -630,6 +630,7 @@ TEST    DC.W    %1111010101110001 ; invalid opcode test
 
 END:
     END    START        ; last line of source
+
 
 
 
