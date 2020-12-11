@@ -52,8 +52,8 @@ IO:
     ; pointed by A0
     ; this is totally up to IO part, so it is subjected to change
     ; for debugging purpose, imagine NOP is the current instruction we are reading
-    MOVE.W  #%0100111001110001, -(SP)
-    MOVEA.L SP, A0
+    
+    LEA TEST, A0
     
     JSR OPCODES
 
@@ -506,17 +506,88 @@ OPCODES_ROR:
     JSR EFFECTIVEADDRESS
     BRA OPCODES_END
 
-OPCODES_INVALID:
-    ;TODO: prepare invalid Hex (in D5)
+OPCODES_INVALID:  
+    LEA Name_RawInvalid, A4
+    MOVE.B  #0, D0 ; first byte
+    JSR PUTHEX
+    
+    ADDA.L  #2, A4 ; move to the next location
+    MOVE.B  #1, D0 ; second byte
+    JSR PUTHEX
+    
+    ADDA.L  #2, A4 ; move to the next location
+    MOVE.B  #0, (A4) ; null terminate
+    
+    MOVE.L  #0, D4 ; no size
+    LEA Name_RawInvalid, A4 ; reset the pointer
+    JSR IO_PRINT_OPCODES
+    
     BRA OPCODES_END
 
 OPCODES_END:
-    ; at this point, opcodeSize sould be ready
-    ; TODO: send OPCODE and EA to IO to print out
-    
     MOVEM.L (SP)+, ALL_REG ; restore saved register state
     RTS ; return to IO
+
+;
+; Put two Hex value (as ASCII) at the specified index (D0) starting from A0
+; into the WORD starting from A4. (each ASCII take 1 BYTE)
+;
+; Ex) Read 1 byte -> F5 -> 46 35 (string)
+;
+; Do not forget that the end of the string must be null terminated manually.
+;
+; Precondition:
+;   A0 is pointing to the beginning of the array
+;   D0.L is index value (A0 + this value)
+;   A4 is pointing to the destination (does not depend on D0)
+PUTHEX:
+    MOVEM.L ALL_REG, -(SP)
+
+    ADDA.L  D0, A0
+
+    ; first hex
+    MOVE.B (A0), D1
+    AND.B   #$F0, D1 ; use first 4 bits
+    LSR.B   #4, D1 ; shift right 4 bits to get the value
+    JSR DIGIT_OR_ALPHA
+    MOVE.B  D2, (A4)
     
+    ADDA.L  #1, A4 ; advance one byte
+    
+    ; second hex
+    MOVE.B (A0), D1 
+    AND.B   #$0F, D1 ; use last 4 bits
+    JSR DIGIT_OR_ALPHA
+    MOVE.B  D2, (A4)
+    
+    MOVEM.L (SP)+, ALL_REG
+    RTS
+
+;
+; Given the input Byte (D1), return the appropriate Hex character
+;
+; Precondition:
+;   D1 >= 0 and D1 < 16
+; Postcondition:
+;   D2 contains the corresponding digit or alphabet
+;   If D1 is out of range value, the D2 value is undefined
+;
+DIGIT_OR_ALPHA:
+    CMP.B   #10, D1 ; digit or alphabet?
+    BGE ALPHA
+    BRA DIGIT
+    
+ALPHA:
+    MOVE.B  D1, D2
+    SUB.B   #10, D2
+    ADD.B   #'A', D2
+    RTS
+
+DIGIT:
+    MOVE.B  D1, D2
+    ADD.B   #'0', D2
+    RTS
+
 * end of OpCodes
 
 
@@ -552,9 +623,14 @@ Name_Beq    DC.B    'BEQ',0
 Name_Bra    DC.B    'BRA',0
 Name_Moveq    DC.B    'MOVEQ',0
 ;Name_    DC.B    '',0 for copypasta
+Name_RawInvalid DS.B    5 ; 4bytes for opcodes hex chars + 1 byte for null = 3
+
+;TEST    DC.W    %0100111001110001 ; NOP
+TEST    DC.W    %1111010101110001 ; invalid opcode test
 
 END:
     END    START        ; last line of source
+
 
 
 
