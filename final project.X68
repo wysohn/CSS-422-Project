@@ -1018,6 +1018,10 @@ EFFECTIVEADDRESS:
     SIMHALT             ; halt simulator
 
 * Put variables and constants here
+byteOp  DC.B    '.B',0
+wordOp  DC.B    '.W',0
+longOp  DC.B    '.L',0
+
 opcodeRef   DS.L    1
 opcodeSize  DS.L    1
 
