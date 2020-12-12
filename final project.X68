@@ -335,7 +335,7 @@ IF_DONE
     MOVE.L A0,D0        ****Increment the starting address************ Probably need to refer to numberBits later******
     ADDI.L #2,D0
     MOVEA.L D0,A0
-    *JSR     WAIT_FOR_ENTER_KEY
+    JSR     OPCODES
     BRA     DISASSEMBLE
 DONE
     LEA REACHED_END,A1
@@ -1072,6 +1072,10 @@ LINE_COUNTER    DC.B    0
 
 
 
+
+
+
+*~Font name~Courier New~
 
 
 
