@@ -45,14 +45,6 @@ OPSHIFT EQU %1110
 IO:
     ; do some IO works...
 
-*-----------------------------------------------------------
-* Title      :I/O
-* Written by :Team Awesome
-* Date       :
-* Description:
-*-----------------------------------------------------------
-    ORG    $1000
-START:                  ; first instruction of program
 
 STARTING_ADDRESS_PROMPT
     
