@@ -230,7 +230,6 @@ DISASSEMBLE
     MOVE.L  PRINTBUFFER,A1
     LEA     ADDRESS_INCREMENTER,A6
     JSR     PRINT_ADDRESS
-    JSR     OPCODES
 
     JSR     CHECK_NUM_LINES
     *BRA     IF_DONE
@@ -311,8 +310,12 @@ PRINT_0                         *Prints ASCII 0(zero)
 CHECK_NUM_LINES                     ******************Trying to print 20 lines a page ***********************
     MOVE.B   #$00,(A1) 
     LEA      PRINTBUFFER,A1
-    MOVE.B   #13,D0            
+    MOVE.B   #14,D0            
     TRAP #15
+    JSR     OPCODES
+    LEA ENDL, A1
+    MOVE.B  #13, D0
+    TRAP    #15
     LEA     LINE_COUNTER,A6
     ADDQ.B  #1,(A6)
     CMP.B   #$20, (A6)
@@ -1055,6 +1058,7 @@ VALUES   DC.B  '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','
                *0   1    2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39  40  41  42  43
 CR  EQU $0D
 LF  EQU $0A
+ENDL    DC.B CR,LF,0
 PROMPT_START_ADDRESS DC.B   'Enter starting hex address ( 8 characters 00XXXXXX lower case letters only)',CR,LF,0
 PROMPT_END_ADDRESS DC.B   'Enter ending hex address ( 8 characters 00XXXXXX lower case letters only)',CR,LF,0
 REACHED_END DC.B    'Reached end address, DONE',CR,LF,0
