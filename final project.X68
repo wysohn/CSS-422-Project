@@ -45,6 +45,15 @@ OPSHIFT EQU %1110
 IO:
     ; do some IO works...
 
+*-----------------------------------------------------------
+* Title      :I/O
+* Written by :Team Awesome
+* Date       :
+* Description:
+*-----------------------------------------------------------
+    ORG    $1000
+START:                  ; first instruction of program
+
 STARTING_ADDRESS_PROMPT
     
     LEA PROMPT_START_ADDRESS,A1
@@ -226,29 +235,12 @@ CLEAR
   
 *******************STARTING the disassembly**********************************************************************************************************    
 DISASSEMBLE     
-    *CMP.L   A0,A3           *Checks start and end addresses to move into main part of program 
-    *BGT     START
     MOVE.L  PRINTBUFFER,A1
     LEA     ADDRESS_INCREMENTER,A6
-    JSR     IS_NOP_OR_RTS   *Checking if NOP or RTS first 
-    
-IS_NOP_OR_RTS               *Check for NOP or RTS because they differ from the rest 
-     MOVE.W (A3),D6
-     CMP.W  #$4E71,D6       *$4E71 is NOP
-     BEQ    NOP
-     CMP.W  #$4E75,D6       *$4E75 is RTS  
-     BEQ    IS_RTS
-     RTS
-NOP                         * Subroutine if we decode NOP
-    JSR PRINT_ADDRESS
-    JSR PRINT_NOP
-    JSR PRINT_HEX_WORD
-    
-IS_RTS
-    JSR PRINT_ADDRESS
-    JSR PRINT_RTS
-    JSR PRINT_HEX_WORD
-    
+    JSR     PRINT_ADDRESS
+    JSR     CHECK_NUM_LINES
+    *BRA     IF_DONE
+    BRA      WAIT_FOR_ENTER_KEY
 PRINT_ADDRESS               *****PRINTS the memory address the instruction is at********
     LEA PRINTBUFFER,A1
     MOVE.L  A3,D6
@@ -303,31 +295,8 @@ PRINT_ADDRESS               *****PRINTS the memory address the instruction is at
     LSR.L   #4,D6
     MOVE.B  (A2,D6),(A1)+           *Move all the ascii to PRINTERbuffer
     JSR     PRINT_TAB               *Add a tab for the spacing 
-    CLR.L   D6
-    RTS
-    
-PRINT_HEX_WORD
-    MOVE.W  (A3),D6
-    LSR.W   #8,D6
-    LSR.W   #4,D6
-    MOVE.B  (A2,D6),(A1)+
-    MOVE.W  (A3),D6
-    LSL.W   #4,D6
-    LSR.W   #8,D6
-    LSR.W   #4,D6
-    MOVE.B  (A2,D6),(A1)+
-    MOVE.W  (A3),D6
-    LSL.W   #8,D6
-    LSR.W   #8,D6
-    LSR.W   #4,D6
-    MOVE.B  (A2,D6),(A1)+
-    MOVE.W  (A3),D6
-    LSL.W   #8,D6
-    LSL.W   #4,D6
-    LSR.W   #8,D6
-    LSR.W   #4,D6
-    MOVE.B  (A2,D6),(A1)+
-    CLR.W   D6
+    JSR     PRINT_DATA              *This should only print if opcode cant be decoded 
+    CLR.L   D6  
     RTS
 
 PRINT_TAB                        * Adds a tab to the print buffer
@@ -344,46 +313,44 @@ PRINT_DATA                      *Prints the ASCII string 'DATA'
                  
 PRINT_0                         *Prints ASCII 0(zero)
     MOVE.B  0(A2),(A1)+
-    
-    
-PRINT_NOP
-    MOVE.B  23(A2),(A1)+        *N
-    MOVE.B  24(A2),(A1)+        *O
-    MOVE.B  25(A2),(A1)+        *P
-    RTS    
-    
-PRINT_RTS
-    MOVE.B   27(A2),(A1)+        *R
-    MOVE.B   29(A2),(A1)+        *T
-    MOVE.B   28(A2),(A1)+        *S
     RTS
     
-
-***********************MAIN PRINT SUBROUTINE*************************
-PRINT
-    MOVE.B   #$00,(A1)           *Need the 00 as the terminator of the string;
-    MOVE.L PRINTBUFFER,A1        
+CHECK_NUM_LINES                     ******************Trying to print 20 lines a page ***********************
+    MOVE.B   #$00,(A1) 
+    LEA      PRINTBUFFER,A1
     MOVE.B   #13,D0            
     TRAP #15
-    BRA NEXT_INSTRUCTION  
-NEXT_INSTRUCTION
-    MOVEA.L  #0,A4
-   * MOVE.B  #2,(A6)             *Re-set the counter for address incrementer
-    CLR.L   D0
-    CLR.L   D1
-    CLR.L   D2
-    CLR.L   D3
-    CLR.L   D4
-    CLR.L   D5
-    CLR.L   D6
-    ADDI.B  #2,(A6)         
-    BRA IF_DONE
+    LEA     LINE_COUNTER,A6
+    ADDQ.B  #1,(A6)
+    CMP.B   #$20, (A6)
+    BEQ     WAIT_FOR_ENTER_KEY
+    BRA     IF_DONE
+    
+WAIT_FOR_ENTER_KEY
+    LEA     WAIT,A1         *****Print press enter key message******
+    MOVE.B  #14,D0
+    TRAP    #15
+    
+    MOVE.B  #5,D0
+    TRAP    #15
+    CMP.B   #CR,D1
+    BEQ     IF_DONE
+    BRA     WAIT_FOR_ENTER_KEY
+
 IF_DONE
     CMP.L   A3,A0
     BLT     DONE
+    MOVE.L A3,D0        ****Increment the starting address************ Probably need to refer to numberBits later******
+    ADDI.L #2,D0
+    MOVEA.L D0,A3
+    *JSR     WAIT_FOR_ENTER_KEY
     BRA     DISASSEMBLE
 DONE
-    JSR OPCODES
+    LEA REACHED_END,A1
+    MOVE.B  #13,D0
+    TRAP    #15
+    
+JSR OPCODES
 
 *-----------------------------------------------------------
 * Preconditions:
@@ -1055,8 +1022,9 @@ VALUES   DC.B  '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','
                *0   1    2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39  40  41  42  43
 CR  EQU $0D
 LF  EQU $0A
-PROMPT_START_ADDRESS DC.B   'Please enter a starting hex address ( 8 characters XXXXXXXX)',CR,LF,0
-PROMPT_END_ADDRESS DC.B   'Please enter an ending hex address ( 8 characters XXXXXXXX)',CR,LF,0
+PROMPT_START_ADDRESS DC.B   'Enter starting hex address ( 8 characters 00XXXXXX lower case letters only)',CR,LF,0
+PROMPT_END_ADDRESS DC.B   'Enter ending hex address ( 8 characters 00XXXXXX lower case letters only)',CR,LF,0
+REACHED_END DC.B    'Reached end address, DONE',CR,LF,0
 DATA DC.B   'DATA',CR,LF,0
 START_ADDRESS   DS.L    1
 END_ADDRESS     DS.L    1
@@ -1066,6 +1034,8 @@ MESSAGE_START_GREATER_THAN_END  DC.B    'Start address cannot be greater than en
 MESSAGE_ODD            DC.B    'Invalid, address cannot be odd',CR,LF,0
 ADDRESS_INCREMENTER DC.B   0
 PRINTBUFFER         DC.L    0
+WAIT    DC.B    'Press enter to continue',CR,LF,0
+LINE_COUNTER    DC.B    0
 
 
 
