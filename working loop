@@ -191,11 +191,9 @@ DISASSEMBLE
     MOVE.L  PRINTBUFFER,A1
     LEA     ADDRESS_INCREMENTER,A6
     JSR     PRINT_ADDRESS
-    MOVE.B   #$00,(A1) 
-    LEA      PRINTBUFFER,A1
-    MOVE.B   #13,D0            
-    TRAP #15
-    BRA     IF_DONE
+    JSR     CHECK_NUM_LINES
+    *BRA     IF_DONE
+    BRA      WAIT_FOR_ENTER_KEY
 PRINT_ADDRESS               *****PRINTS the memory address the instruction is at********
     LEA PRINTBUFFER,A1
     MOVE.L  A3,D6
@@ -250,8 +248,8 @@ PRINT_ADDRESS               *****PRINTS the memory address the instruction is at
     LSR.L   #4,D6
     MOVE.B  (A2,D6),(A1)+           *Move all the ascii to PRINTERbuffer
     JSR     PRINT_TAB               *Add a tab for the spacing 
-    CLR.L   D6
-    
+    JSR     PRINT_DATA              *This should only print if opcode cant be decoded 
+    CLR.L   D6  
     RTS
 
 PRINT_TAB                        * Adds a tab to the print buffer
@@ -269,16 +267,41 @@ PRINT_DATA                      *Prints the ASCII string 'DATA'
 PRINT_0                         *Prints ASCII 0(zero)
     MOVE.B  0(A2),(A1)+
     RTS
-   
+    
+CHECK_NUM_LINES                     ******************Trying to print 20 lines a page ***********************
+    MOVE.B   #$00,(A1) 
+    LEA      PRINTBUFFER,A1
+    MOVE.B   #13,D0            
+    TRAP #15
+    LEA     LINE_COUNTER,A6
+    ADDQ.B  #1,(A6)
+    CMP.B   #$20, (A6)
+    BEQ     WAIT_FOR_ENTER_KEY
+    BRA     IF_DONE
+    
+WAIT_FOR_ENTER_KEY
+    LEA     WAIT,A1         *****Print press enter key message******
+    MOVE.B  #14,D0
+    TRAP    #15
+    
+    MOVE.B  #5,D0
+    TRAP    #15
+    CMP.B   #CR,D1
+    BEQ     IF_DONE
+    BRA     WAIT_FOR_ENTER_KEY
+
 IF_DONE
     CMP.L   A3,A0
     BLT     DONE
     MOVE.L A3,D0        ****Increment the starting address************ Probably need to refer to numberBits later******
-    ADDI.B #2,D0
+    ADDI.L #2,D0
     MOVEA.L D0,A3
+    *JSR     WAIT_FOR_ENTER_KEY
     BRA     DISASSEMBLE
 DONE
-
+    LEA REACHED_END,A1
+    MOVE.B  #13,D0
+    TRAP    #15
       
     SIMHALT             ; halt simulator
 
@@ -287,8 +310,9 @@ VALUES   DC.B  '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','
                *0   1    2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39  40  41  42  43
 CR  EQU $0D
 LF  EQU $0A
-PROMPT_START_ADDRESS DC.B   'Please enter a starting hex address ( 8 characters XXXXXXXX)',CR,LF,0
-PROMPT_END_ADDRESS DC.B   'Please enter an ending hex address ( 8 characters XXXXXXXX)',CR,LF,0
+PROMPT_START_ADDRESS DC.B   'Enter starting hex address ( 8 characters 00XXXXXX lower case letters only)',CR,LF,0
+PROMPT_END_ADDRESS DC.B   'Enter ending hex address ( 8 characters 00XXXXXX lower case letters only)',CR,LF,0
+REACHED_END DC.B    'Reached end address, DONE',CR,LF,0
 DATA DC.B   'DATA',CR,LF,0
 START_ADDRESS   DS.L    1
 END_ADDRESS     DS.L    1
@@ -298,7 +322,8 @@ MESSAGE_START_GREATER_THAN_END  DC.B    'Start address cannot be greater than en
 MESSAGE_ODD            DC.B    'Invalid, address cannot be odd',CR,LF,0
 ADDRESS_INCREMENTER DC.B   0
 PRINTBUFFER         DC.L    0
-
+WAIT    DC.B    'Press enter to continue',CR,LF,0
+LINE_COUNTER    DC.B    0
     END    START        ; last line of source
 
 
