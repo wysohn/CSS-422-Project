@@ -1,47 +1,11 @@
 *-----------------------------------------------------------
-* Title      : Dis-assembler
-* Written by : Team Awesome
+* Title      :I/O
+* Written by :Team Awesome
 * Date       :
 * Description:
 *-----------------------------------------------------------
-
-START    ORG    $1000      ; first instruction of program
-
-; Opcodes follow specific patterns
-* MOVE, MOVEA
-* 0 0 ? ?
-OPMOVE EQU %00
-* NOP, MOVEM, LEA, NOT, JSR, RTS
-* 0 1 0 0 
-OPSPCIAL    EQU %0100
-* ADDQ
-* 0 1 0 1
-OPADDQ  EQU %0101
-* BGT, BLE, BEQ, BRA
-* 0 1 1 0
-OPBRA   EQU %0110
-* MOVEQ
-* 0 1 1 1
-OPMOVEQ EQU %0111
-* OR
-* 1 0 0 0
-OPOR    EQU %1000
-* SUB
-* 1 0 0 1
-OPSUB   EQU %1001
-* AND
-* 1 1 0 0
-OPAND   EQU %1001
-* ADD, ADDA
-* 1 1 0 1
-OPADD   EQU %1101
-* LSL, LSR, ASL, ASR, ROL, ROR
-* 1 1 1 0
-OPSHIFT EQU %1110
-
-* start of IO
-IO:
-    ; do some IO works...
+    ORG    $1000
+START:                  ; first instruction of program
 
 STARTING_ADDRESS_PROMPT
     
@@ -224,29 +188,14 @@ CLEAR
   
 *******************STARTING the disassembly**********************************************************************************************************    
 DISASSEMBLE     
-    *CMP.L   A0,A3           *Checks start and end addresses to move into main part of program 
-    *BGT     START
     MOVE.L  PRINTBUFFER,A1
     LEA     ADDRESS_INCREMENTER,A6
-    JSR     IS_NOP_OR_RTS   *Checking if NOP or RTS first 
-    
-IS_NOP_OR_RTS               *Check for NOP or RTS because they differ from the rest 
-     MOVE.W (A3),D6
-     CMP.W  #$4E71,D6       *$4E71 is NOP
-     BEQ    NOP
-     CMP.W  #$4E75,D6       *$4E75 is RTS  
-     BEQ    IS_RTS
-     RTS
-NOP                         * Subroutine if we decode NOP
-    JSR PRINT_ADDRESS
-    JSR PRINT_NOP
-    JSR PRINT_HEX_WORD
-    
-IS_RTS
-    JSR PRINT_ADDRESS
-    JSR PRINT_RTS
-    JSR PRINT_HEX_WORD
-    
+    JSR     PRINT_ADDRESS
+    MOVE.B   #$00,(A1) 
+    LEA      PRINTBUFFER,A1
+    MOVE.B   #13,D0            
+    TRAP #15
+    BRA     IF_DONE
 PRINT_ADDRESS               *****PRINTS the memory address the instruction is at********
     LEA PRINTBUFFER,A1
     MOVE.L  A3,D6
@@ -302,30 +251,7 @@ PRINT_ADDRESS               *****PRINTS the memory address the instruction is at
     MOVE.B  (A2,D6),(A1)+           *Move all the ascii to PRINTERbuffer
     JSR     PRINT_TAB               *Add a tab for the spacing 
     CLR.L   D6
-    RTS
     
-PRINT_HEX_WORD
-    MOVE.W  (A3),D6
-    LSR.W   #8,D6
-    LSR.W   #4,D6
-    MOVE.B  (A2,D6),(A1)+
-    MOVE.W  (A3),D6
-    LSL.W   #4,D6
-    LSR.W   #8,D6
-    LSR.W   #4,D6
-    MOVE.B  (A2,D6),(A1)+
-    MOVE.W  (A3),D6
-    LSL.W   #8,D6
-    LSR.W   #8,D6
-    LSR.W   #4,D6
-    MOVE.B  (A2,D6),(A1)+
-    MOVE.W  (A3),D6
-    LSL.W   #8,D6
-    LSL.W   #4,D6
-    LSR.W   #8,D6
-    LSR.W   #4,D6
-    MOVE.B  (A2,D6),(A1)+
-    CLR.W   D6
     RTS
 
 PRINT_TAB                        * Adds a tab to the print buffer
@@ -342,210 +268,20 @@ PRINT_DATA                      *Prints the ASCII string 'DATA'
                  
 PRINT_0                         *Prints ASCII 0(zero)
     MOVE.B  0(A2),(A1)+
-    
-    
-PRINT_NOP
-    MOVE.B  23(A2),(A1)+        *N
-    MOVE.B  24(A2),(A1)+        *O
-    MOVE.B  25(A2),(A1)+        *P
-    RTS    
-    
-PRINT_RTS
-    MOVE.B   27(A2),(A1)+        *R
-    MOVE.B   29(A2),(A1)+        *T
-    MOVE.B   28(A2),(A1)+        *S
     RTS
-    
-
-***********************MAIN PRINT SUBROUTINE*************************
-PRINT
-    MOVE.B   #$00,(A1)           *Need the 00 as the terminator of the string;
-    MOVE.L PRINTBUFFER,A1        
-    MOVE.B   #13,D0            
-    TRAP #15
-    BRA NEXT_INSTRUCTION  
-NEXT_INSTRUCTION
-    MOVEA.L  #0,A4
-   * MOVE.B  #2,(A6)             *Re-set the counter for address incrementer
-    CLR.L   D0
-    CLR.L   D1
-    CLR.L   D2
-    CLR.L   D3
-    CLR.L   D4
-    CLR.L   D5
-    CLR.L   D6
-    ADDI.B  #2,(A6)         
-    BRA IF_DONE
+   
 IF_DONE
     CMP.L   A3,A0
     BLT     DONE
+    MOVE.L A3,D0        ****Increment the starting address************ Probably need to refer to numberBits later******
+    ADDI.B #2,D0
+    MOVEA.L D0,A3
     BRA     DISASSEMBLE
 DONE
 
-    JSR OPCODES
-* end of IO
-
-* start of OpCodes
-OPCODES:
-    ; decode opcode parts
-    JSR EFFECTIVEADDRESS
-    
-    RTS
-* end of OpCodes
-
-* start of EA
-EFFECTIVEADDRESS:
-    ; do some EA works...
-    EffectiveAddress:                  ; Starts EA section by comparing the opcodeRef Passed to figure out opcode EA to decode
-         MOVE.L #8,opcodeRef   ;for Testing opcodeRef entries
-         MOVE.L #1,D2          ;Counter for comparisons
-    
-         CMP.L  opcodeRef,D2           
-         BEQ    MoveMovea
-         ADDQ.B #1,D2
-    
-         CMP.L  opcodeRef,D2           
-         BEQ    MoveEA
-         ADDQ.B #1,D2
-    
-         CMP.L  opcodeRef,D2           
-         BEQ    MoveaEA
-         ADDQ.B #1,D2
-
-         CMP.L  opcodeRef,D2           
-         BEQ    NopEA
-         ADDQ.B #1,D2
-    
-         CMP.L  opcodeRef,D2           
-         BEQ    MovemEA
-         ADDQ.B #1,D2
-    
-         CMP.L  opcodeRef,D2           
-         BEQ    LeaEA
-         ADDQ.B #1,D2
-    
-         CMP.L  opcodeRef,D2           
-         BEQ    NotEA
-         ADDQ.B #1,D2
-    
-         CMP.L  opcodeRef,D2           
-         BEQ    JsrEA
-         ADDQ.B #1,D2
-    
-         CMP.L  opcodeRef,D2           
-         BEQ    RtsEA
-         ADDQ.B #1,D2
-    
-         CMP.L  opcodeRef,D2           
-         BEQ    AddqEA
-         ADDQ.B #1,D2
-    
-         CMP.L  opcodeRef,D2           
-         BEQ    BgtEA
-         ADDQ.B #1,D2
-
-         CMP.L  opcodeRef,D2           
-         BEQ    BleEA
-         ADDQ.B #1,D2
-    
-         CMP.L  opcodeRef,D2           
-         BEQ    BeqEA
-         ADDQ.B #1,D2
-    
-         CMP.L  opcodeRef,D2           
-         BEQ    BraEA
-         ADDQ.B #1,D2
-    
-         CMP.L  opcodeRef,D2           
-         BEQ    MoveqEA
-         ADDQ.B #1,D2
-    
-         CMP.L  opcodeRef,D2           ;First compare the opcode value to branch to proper EA decoding section
-         BEQ    OrEA
-         ADDQ.B #1,D2
-    
-         CMP.L  opcodeRef,D2           
-         BEQ    SubEA
-         ADDQ.B #1,D2
-    
-         CMP.L  opcodeRef,D2           
-         BEQ    AndEA
-         ADDQ.B #1,D2
-    
-         CMP.L  opcodeRef,D2           
-         BEQ    AddEA
-         ADDQ.B #1,D2
-    
-         CMP.L  opcodeRef,D2           
-         BEQ    AddaEA
-         ADDQ.B #1,D2
-         
-MoveMovea  
-
-MoveEA
-
-MoveaEA
-
-NopEA
-
-MovemEA
-
-LeaEA
-
-NotEA
-
-JsrEA    
-
-RtsEA
-
-AddqEA
-
-BgtEA
-
-BleEA    
-
-BeqEA
-
-BraEA
-
-MoveqEA
-
-OrEA     
-         
-SubEA   
-         
-AndEA    
-
-AddEA   
-
-AddaEA       
-         
-EndEA   
-        
-LslEA
-
-LrsEA
-
-AslEA
-
-AsrEA
-
-RolEA
-
-RorEA
-
-
-    RTS
-* end of EA
-
-* end of program
-
+      
     SIMHALT             ; halt simulator
 
-* Put variables and constants here
-
-END:
-    END    START        ; last line of source
 * Put variables and constants here
 VALUES   DC.B  '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','.',',','$','(',')','#','+','-' 
                *0   1    2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39  40  41  42  43
@@ -563,8 +299,11 @@ MESSAGE_ODD            DC.B    'Invalid, address cannot be odd',CR,LF,0
 ADDRESS_INCREMENTER DC.B   0
 PRINTBUFFER         DC.L    0
 
-*~Font name~Courier New~
-*~Font size~10~
-*~Tab type~1~
-*~Tab size~4~
+    END    START        ; last line of source
+
+
+
+
+
+
 
