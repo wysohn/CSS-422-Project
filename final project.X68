@@ -371,16 +371,19 @@ IO_PRINT_OPCODES_SIZE_B:
     LEA byteOp, A1
     MOVE.B  #14, D0
     TRAP    #15   
+    BRA IO_PRINT_OPCODES_SIZE_END
 
 IO_PRINT_OPCODES_SIZE_W:
     LEA wordOp, A1
     MOVE.B  #14, D0
     TRAP    #15
+    BRA IO_PRINT_OPCODES_SIZE_END
     
 IO_PRINT_OPCODES_SIZE_L:
     LEA longOp, A1
     MOVE.B  #14, D0
     TRAP    #15
+    BRA IO_PRINT_OPCODES_SIZE_END
     
 IO_PRINT_OPCODES_SIZE_END:    
     MOVEM.L (SP)+, ALL_REG ; restore saved register state
@@ -1082,6 +1085,7 @@ LINE_COUNTER    DC.B    0
 
 
 *~Font name~Courier New~
+
 
 
 
