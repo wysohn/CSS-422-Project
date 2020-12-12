@@ -199,7 +199,7 @@ END_ADDRESS_PROMPT
     
 COMPARE_START_AND_END
     MOVE.L  A3,A4           *Copying end address to A4 to check for error if it is smaller than start address
-    SUB.L   A0,A4           *Subtracting end address from start address
+    SUB.L   A3,A4           *Subtracting end address from start address
     CMP     #0,A4
     BGT     START_GREATER_THAN_END
     BRA     CLEAR
@@ -235,14 +235,14 @@ DISASSEMBLE
     BRA      WAIT_FOR_ENTER_KEY
 PRINT_ADDRESS               *****PRINTS the memory address the instruction is at********
     LEA PRINTBUFFER,A1
-    MOVE.L  A3,D6
+    MOVE.L  A0,D6
     JSR PRINT_0                     *68K always has address of 00XXXXXX, so we print 2 zeros
     JSR PRINT_0                     
     LSR.L   #8,D6                   *Shift bits to isolate 3rd digit in address  
     LSR.L   #8,D6
     LSR.L   #4,D6
     MOVE.B  (A2,D6),(A1)+           *Move digit ascii to PRINTBUFFER 
-    MOVE.L  A3,D6                   *Re-set the address because it was modified
+    MOVE.L  A0,D6                   *Re-set the address because it was modified
     LSL.L   #8,D6                   *Shift bits to isolate 4th digit in address
     LSL.L   #4,D6
     LSR.L   #8,D6
@@ -250,7 +250,7 @@ PRINT_ADDRESS               *****PRINTS the memory address the instruction is at
     LSR.L   #8,D6
     LSR.L   #4,D6
     MOVE.B  (A2,D6),(A1)+          
-    MOVE.L  A3,D6                  
+    MOVE.L  A0,D6                  
     LSL.L   #8,D6                  
     LSL.L   #8,D6
     LSR.L   #8,D6
@@ -258,7 +258,7 @@ PRINT_ADDRESS               *****PRINTS the memory address the instruction is at
     LSR.L   #8,D6
     LSR.L   #4,D6
     MOVE.B  (A2,D6),(A1)+          
-    MOVE.L  A3,D6                   
+    MOVE.L  A0,D6                   
     LSL.L   #8,D6                   
     LSL.L   #8,D6
     LSL.L   #4,D6
@@ -267,7 +267,7 @@ PRINT_ADDRESS               *****PRINTS the memory address the instruction is at
     LSR.L   #8,D6
     LSR.L   #4,D6
     MOVE.B  (A2,D6),(A1)+           
-    MOVE.L  A3,D6                   
+    MOVE.L  A0,D6                   
     LSL.L   #8,D6                   
     LSL.L   #8,D6
     LSL.L   #8,D6
@@ -276,7 +276,7 @@ PRINT_ADDRESS               *****PRINTS the memory address the instruction is at
     LSR.L   #8,D6
     LSR.L   #4,D6
     MOVE.B  (A2,D6),(A1)+          
-    MOVE.L  A3,D6                  
+    MOVE.L  A0,D6                  
     LSL.L   #8,D6                  
     LSL.L   #8,D6
     LSL.L   #8,D6
@@ -330,11 +330,11 @@ WAIT_FOR_ENTER_KEY
     BRA     WAIT_FOR_ENTER_KEY
 
 IF_DONE
-    CMP.L   A3,A0
+    CMP.L   A0,A3
     BLT     DONE
-    MOVE.L A3,D0        ****Increment the starting address************ Probably need to refer to numberBits later******
+    MOVE.L A0,D0        ****Increment the starting address************ Probably need to refer to numberBits later******
     ADDI.L #2,D0
-    MOVEA.L D0,A3
+    MOVEA.L D0,A0
     *JSR     WAIT_FOR_ENTER_KEY
     BRA     DISASSEMBLE
 DONE
