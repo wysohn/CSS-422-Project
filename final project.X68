@@ -749,19 +749,31 @@ OPCODES_MOVEQ:
 ; TODO: the rest of opcodes
 
 OPCODES_OR:
+    MOVE.L  #0, D4
+    LEA Name_Or, A4
+    JSR IO_PRINT_OPCODES
+    
     MOVE.L  #16, opcodeRef 
     JSR EFFECTIVEADDRESS
-    BRA OPCODES_END
+    BRA OPCODES_ADD_SIZES
 
 OPCODES_SUB:
+    MOVE.L  #0, D4
+    LEA Name_Sub, A4
+    JSR IO_PRINT_OPCODES
+    
     MOVE.L  #17, opcodeRef 
     JSR EFFECTIVEADDRESS
-    BRA OPCODES_END
+    BRA OPCODES_ADD_SIZES
     
 OPCODES_AND:
+    MOVE.L  #0, D4
+    LEA Name_And, A4
+    JSR IO_PRINT_OPCODES
+    
     MOVE.L  #18, opcodeRef 
     JSR EFFECTIVEADDRESS
-    BRA OPCODES_END
+    BRA OPCODES_ADD_SIZES
 
 OPCODES_ADD:
     MOVE.W  (A0), D5
@@ -772,14 +784,22 @@ OPCODES_ADD:
     CMP.W   #%001,  D6 ; is dest mode 001? then it is ADDA, or else, ADD
     BEQ     OPCODES_ADDA
     
+    MOVE.L  #0, D4
+    LEA Name_Add, A4
+    JSR IO_PRINT_OPCODES
+    
     MOVE.L  #19, opcodeRef
     JSR EFFECTIVEADDRESS
-    BRA OPCODES_END
+    BRA OPCODES_ADD_SIZES
 
 OPCODES_ADDA:
+    MOVE.L  #0, D4
+    LEA Name_Adda, A4
+    JSR IO_PRINT_OPCODES
+    
     MOVE.L  #20, opcodeRef 
     JSR EFFECTIVEADDRESS
-    BRA OPCODES_END
+    BRA OPCODES_ADD_SIZES
     
 OPCODES_ADD_SIZES: ; all of the or,sub,and,add,adda
     MOVE.L  (A0), D5
@@ -808,20 +828,14 @@ OPCODES_ADD_SIZES: ; all of the or,sub,and,add,adda
 
 OPCODES_ADD_SIZES_B:
     MOVE.L  #1, D4
-    BRA OPCODES_ADD_SIZES_END
+    BRA OPCODES_END
 
 OPCODES_ADD_SIZES_W:
     MOVE.L  #2, D4
-    BRA OPCODES_ADD_SIZES_END
+    BRA OPCODES_END
 
 OPCODES_ADD_SIZES_L:
     MOVE.L  #3, D4
-    BRA OPCODES_ADD_SIZES_END
-
-OPCODES_ADD_SIZES_END:
-    LEA Name_Move, A4
-    JSR IO_PRINT_OPCODES ; A4 pointing to the op name, D4 contains op size
-    JSR EFFECTIVEADDRESS
     BRA OPCODES_END
     
 OPCODES_LSL:
@@ -846,6 +860,10 @@ OPCODES_LSL:
     CMP.W   #%10, D5
     BNE OPCODES_INVALID ; this is the last possible case, so if didn't match, then it's not a valid opcode.
     
+    MOVE.L  #0, D4
+    LEA Name_Lsl, A4
+    JSR IO_PRINT_OPCODES
+    
     MOVE.L  #21, opcodeRef ; otherwise, it's LSL
     JSR EFFECTIVEADDRESS
     BRA OPCODES_END
@@ -866,29 +884,49 @@ OPCODES_LSR:
     CMP.W   #%10, D5
     BNE OPCODES_INVALID ; this is the last possible case, so if didn't match, then it's not a valid opcode.
     
+    MOVE.L  #0, D4
+    LEA Name_Lsr, A4
+    JSR IO_PRINT_OPCODES
+    
     MOVE.L  #22, opcodeRef ; otherwise, it's LSR
     JSR EFFECTIVEADDRESS
-    BRA OPCODES_END
+    BRA OPCODES_SHIFTING_SIZES
     
 OPCODES_ASL:
+    MOVE.L  #0, D4
+    LEA Name_Asl, A4
+    JSR IO_PRINT_OPCODES
+    
     MOVE.L  #23, opcodeRef 
     JSR EFFECTIVEADDRESS
-    BRA OPCODES_END
+    BRA OPCODES_SHIFTING_SIZES
 
 OPCODES_ASR:
+    MOVE.L  #0, D4
+    LEA Name_Asr, A4
+    JSR IO_PRINT_OPCODES
+    
     MOVE.L  #24, opcodeRef 
     JSR EFFECTIVEADDRESS
-    BRA OPCODES_END
+    BRA OPCODES_SHIFTING_SIZES
 
 OPCODES_ROL:
+    MOVE.L  #0, D4
+    LEA Name_Rol, A4
+    JSR IO_PRINT_OPCODES
+    
     MOVE.L  #25, opcodeRef 
     JSR EFFECTIVEADDRESS
-    BRA OPCODES_END
+    BRA OPCODES_SHIFTING_SIZES
 
 OPCODES_ROR:
+    MOVE.L  #0, D4
+    LEA Name_Ror, A4
+    JSR IO_PRINT_OPCODES
+    
     MOVE.L  #26, opcodeRef 
     JSR EFFECTIVEADDRESS
-    BRA OPCODES_END
+    BRA OPCODES_SHIFTING_SIZES
     
 OPCODES_SHIFTING_SIZES: ; all of the lsl,lsr,asl,asr,rol,ror
     MOVE.L  (A0), D5
@@ -908,21 +946,16 @@ OPCODES_SHIFTING_SIZES: ; all of the lsl,lsr,asl,asr,rol,ror
 
 OPCODES_SHIFTING_SIZES_B:
     MOVE.L  #1, D4
-    BRA OPCODES_SHIFTING_SIZES_END
+    BRA OPCODES_END
 
 OPCODES_SHIFTING_SIZES_W:
     MOVE.L  #2, D4
-    BRA OPCODES_SHIFTING_SIZES_END
+    BRA OPCODES_END
 
 OPCODES_SHIFTING_SIZES_L:
     MOVE.L  #3, D4
-    BRA OPCODES_SHIFTING_SIZES_END
-
-OPCODES_SHIFTING_SIZES_END:
-    LEA Name_Move, A4
-    JSR IO_PRINT_OPCODES ; A4 pointing to the op name, D4 contains op size
-    JSR EFFECTIVEADDRESS
     BRA OPCODES_END
+
 
 OPCODES_INVALID:  
     LEA Name_RawInvalid, A4
@@ -2571,6 +2604,18 @@ Name_Ble    DC.B    'BLE',0
 Name_Beq    DC.B    'BEQ',0
 Name_Bra    DC.B    'BRA',0
 Name_Moveq    DC.B    'MOVEQ',0
+Name_Or    DC.B    'OR',0
+Name_Sub    DC.B    'SUB',0
+Name_And    DC.B    'And',0
+Name_Add    DC.B    'ADD',0
+Name_Adda    DC.B    'ADDA',0
+Name_Lsl    DC.B    'LSL',0
+Name_Lsr    DC.B    'LSR',0
+Name_Asl    DC.B    'ASL',0
+Name_Asr    DC.B    'ASR',0
+Name_Rol    DC.B    'ROL',0
+Name_Ror    DC.B    'ROR',0
+
 EndBRA  DC.B 'End',CR,LF,0
 Dn0     DC.B 'D0',0
 Dn1     DC.B 'D1',0
