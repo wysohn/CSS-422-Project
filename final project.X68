@@ -1018,6 +1018,7 @@ EFFECTIVEADDRESS:
     SIMHALT             ; halt simulator
 
 * Put variables and constants here
+opcodeRef   DS.L    1
 opcodeSize  DS.L    1
 
 Name_Move   DC.B    'MOVE',0
@@ -1073,6 +1074,7 @@ LINE_COUNTER    DC.B    0
 
 
 *~Font name~Courier New~
+
 
 
 *~Font name~Courier New~
