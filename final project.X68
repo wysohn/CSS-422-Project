@@ -289,7 +289,6 @@ PRINT_ADDRESS               *****PRINTS the memory address the instruction is at
     LSR.L   #4,D6
     MOVE.B  (A2,D6),(A1)+           *Move all the ascii to PRINTERbuffer
     JSR     PRINT_TAB               *Add a tab for the spacing 
-    JSR     PRINT_DATA              *This should only print if opcode cant be decoded 
     CLR.L   D6  
     RTS
 
@@ -332,7 +331,7 @@ WAIT_FOR_ENTER_KEY
     BRA     WAIT_FOR_ENTER_KEY
 
 IF_DONE
-    CMP.L   A3,A0
+    CMP.L   A0,A3
     BLT     DONE
     MOVE.L A0,D0        ****Increment the starting address************ Probably need to refer to numberBits later******
     ADDI.L #2,D0
@@ -369,6 +368,7 @@ IO_PRINT_OPCODES:
     
 IO_PRINT_OPCODES_SIZE_B:
     LEA byteOp, A1
+    
     MOVE.B  #14, D0
     TRAP    #15   
     BRA IO_PRINT_OPCODES_SIZE_END
