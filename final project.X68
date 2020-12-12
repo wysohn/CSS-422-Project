@@ -350,7 +350,40 @@ JSR OPCODES
 *   - D4 contains size (0 for ignore, 1 for Byte, 2 for Word, 3 for Long
 *-----------------------------------------------------------
 IO_PRINT_OPCODES:
-    ; TODO: something...
+    MOVEM.L ALL_REG, -(SP) ; store current register state
+    
+    MOVEA.L A4, A1
+    MOVE.B  #14, D0
+    TRAP    #15
+    
+    CMP.L   #1, D4
+    BEQ IO_PRINT_OPCODES_SIZE_B
+    
+    CMP.L   #2, D4
+    BEQ IO_PRINT_OPCODES_SIZE_W
+    
+    CMP.L   #3, D4
+    BEQ IO_PRINT_OPCODES_SIZE_L
+    
+    BRA IO_PRINT_OPCODES_SIZE_END ; don't print
+    
+IO_PRINT_OPCODES_SIZE_B:
+    LEA byteOp, A1
+    MOVE.B  #14, D0
+    TRAP    #15   
+
+IO_PRINT_OPCODES_SIZE_W:
+    LEA wordOp, A1
+    MOVE.B  #14, D0
+    TRAP    #15
+    
+IO_PRINT_OPCODES_SIZE_L:
+    LEA longOp, A1
+    MOVE.B  #14, D0
+    TRAP    #15
+    
+IO_PRINT_OPCODES_SIZE_END:    
+    MOVEM.L (SP)+, ALL_REG ; restore saved register state
     RTS
 * end of IO
 
@@ -985,6 +1018,11 @@ EFFECTIVEADDRESS:
     SIMHALT             ; halt simulator
 
 * Put variables and constants here
+byteOp  DC.B    '.B',0
+wordOp  DC.B    '.W',0
+longOp  DC.B    '.L',0
+
+opcodeRef   DS.L    1
 opcodeSize  DS.L    1
 
 Name_Move   DC.B    'MOVE',0
@@ -1007,8 +1045,8 @@ Name_RawInvalid DS.B    5 ; 4bytes for opcodes hex chars + 1 byte for null = 3
 ;TEST    DC.W    %0100111001110001 ; NOP
 TEST    DC.W    %1111010101110001 ; invalid opcode test
 
-END:
-    END    START        ; last line of source
+
+
 * Put variables and constants here
 VALUES   DC.B  '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','.',',','$','(',')','#','+','-' 
                *0   1    2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39  40  41  42  43
@@ -1029,7 +1067,7 @@ PRINTBUFFER         DC.L    0
 WAIT    DC.B    'Press enter to continue',CR,LF,0
 LINE_COUNTER    DC.B    0
 
-
+    END    START        ; last line of source
 
 
 
@@ -1040,7 +1078,10 @@ LINE_COUNTER    DC.B    0
 
 
 *~Font name~Courier New~
+
+
+
+*~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
 *~Tab size~4~
-
