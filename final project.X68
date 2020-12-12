@@ -342,8 +342,6 @@ DONE
     MOVE.B  #13,D0
     TRAP    #15
     
-JSR OPCODES
-
 *-----------------------------------------------------------
 * Preconditions:
 *   - A4 pointing to the opcode name (null terminated string)
@@ -1045,8 +1043,8 @@ Name_RawInvalid DS.B    5 ; 4bytes for opcodes hex chars + 1 byte for null = 3
 ;TEST    DC.W    %0100111001110001 ; NOP
 TEST    DC.W    %1111010101110001 ; invalid opcode test
 
-END:
-    END    START        ; last line of source
+
+
 * Put variables and constants here
 VALUES   DC.B  '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','.',',','$','(',')','#','+','-' 
                *0   1    2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39  40  41  42  43
@@ -1067,6 +1065,7 @@ PRINTBUFFER         DC.L    0
 WAIT    DC.B    'Press enter to continue',CR,LF,0
 LINE_COUNTER    DC.B    0
 
+    END    START        ; last line of source
 
 
 
@@ -1074,6 +1073,9 @@ LINE_COUNTER    DC.B    0
 
 
 
+
+
+*~Font name~Courier New~
 
 
 
