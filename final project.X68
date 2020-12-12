@@ -342,8 +342,6 @@ DONE
     MOVE.B  #13,D0
     TRAP    #15
     
-JSR OPCODES
-
 *-----------------------------------------------------------
 * Preconditions:
 *   - A4 pointing to the opcode name (null terminated string)
