@@ -134,12 +134,12 @@ STORE_ADDRESSES
     MOVE.L  (A6),D1
     CMP.B   #1,D4   * Counter
     BEQ     STORE_ENDING_ADDRESS
-    MOVE.L  D1,A3   * Input stored in A3
+    MOVE.L  D1,A0   * Starting stored in A3
     ADD.B   #1,D4
     BRA     END_ADDRESS_PROMPT
     
 STORE_ENDING_ADDRESS
-    MOVE.L  D1,A0   * Store ending address into A0
+    MOVE.L  D1,A3   * Store ending address into A0
     BRA     COMPARE_START_AND_END
     
 CHECK_ODD
@@ -230,6 +230,8 @@ DISASSEMBLE
     MOVE.L  PRINTBUFFER,A1
     LEA     ADDRESS_INCREMENTER,A6
     JSR     PRINT_ADDRESS
+    JSR     OPCODES
+
     JSR     CHECK_NUM_LINES
     *BRA     IF_DONE
     BRA      WAIT_FOR_ENTER_KEY
@@ -335,7 +337,7 @@ IF_DONE
     MOVE.L A0,D0        ****Increment the starting address************ Probably need to refer to numberBits later******
     ADDI.L #2,D0
     MOVEA.L D0,A0
-    JSR     OPCODES
+    
     BRA     DISASSEMBLE
 DONE
     LEA REACHED_END,A1
