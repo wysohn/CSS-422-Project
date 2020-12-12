@@ -159,6 +159,21 @@ OPCODES_OTHERS: ; any other OPCODES
     
     ;TODO: add more opcodes
     
+    CMP.B   #OPOR, D5
+    BEQ OPCODES_MOVEQ
+    
+    CMP.B   #OPSUB, D5
+    BEQ OPCODES_MOVEQ
+    
+    CMP.B   #OPAND, D5
+    BEQ OPCODES_MOVEQ
+    
+    CMP.B   #OPADD, D5
+    BEQ OPCODES_MOVEQ
+    
+    CMP.B   #OPSHIFT, D5
+    BEQ OPCODES_MOVEQ
+    
     ; if code doesn't match with any, it's an invalid opcode
     BRA OPCODES_INVALID
 
@@ -440,6 +455,49 @@ OPCODES_ADDA:
     JSR EFFECTIVEADDRESS
     BRA OPCODES_END
     
+OPCODES_ADD_SIZES: ; all of the or,sub,and,add,adda
+    MOVE.L  (A0), D5
+    AND.L   #$01C0, D5 ; use 8th, 9th and 10th bits
+    LSR.L   #6, D5 ; shift right 6 bits to get the value
+    
+    CMP.L   #%000, D5 ; Byte
+    BEQ OPCODES_ADD_SIZES_B
+    
+    CMP.L   #%100, D5 ; Byte
+    BEQ OPCODES_ADD_SIZES_B
+    
+    CMP.L   #%001, D5 ; Word
+    BEQ OPCODES_ADD_SIZES_W
+    
+    CMP.L   #%101, D5 ; Word
+    BEQ OPCODES_ADD_SIZES_W
+    
+    CMP.L   #%110, D5 ; Long
+    BEQ OPCODES_ADD_SIZES_L
+    
+    CMP.L   #%010, D5 ; Long
+    BEQ OPCODES_ADD_SIZES_L
+    
+    BRA OPCODES_INVALID ; invalid size
+
+OPCODES_ADD_SIZES_B:
+    MOVE.L  #1, D4
+    BRA OPCODES_ADD_SIZES_END
+
+OPCODES_ADD_SIZES_W:
+    MOVE.L  #2, D4
+    BRA OPCODES_ADD_SIZES_END
+
+OPCODES_ADD_SIZES_L:
+    MOVE.L  #3, D4
+    BRA OPCODES_ADD_SIZES_END
+
+OPCODES_ADD_SIZES_END:
+    LEA Name_Move, A4
+    JSR IO_PRINT_OPCODES ; A4 pointing to the op name, D4 contains op size
+    JSR EFFECTIVEADDRESS
+    BRA OPCODES_END
+    
 OPCODES_LSL:
     MOVE.W  (A0), D5
     AND.W   #$0100, D5 ; extract 8th bit
@@ -503,6 +561,40 @@ OPCODES_ROL:
 
 OPCODES_ROR:
     MOVE.L  #26, opcodeRef 
+    JSR EFFECTIVEADDRESS
+    BRA OPCODES_END
+    
+OPCODES_SHIFTING_SIZES: ; all of the lsl,lsr,asl,asr,rol,ror
+    MOVE.L  (A0), D5
+    AND.L   #$00C0, D5 ; use 3rd and 4th bits
+    LSR.L   #5, D5 ; shift right 4 bits to get the value
+    
+    CMP.L   #%00, D5 ; Byte
+    BEQ OPCODES_SHIFTING_SIZES_B
+    
+    CMP.L   #%01, D5 ; Word
+    BEQ OPCODES_SHIFTING_SIZES_W
+    
+    CMP.L   #%10, D5 ; Long
+    BEQ OPCODES_SHIFTING_SIZES_L
+    
+    BRA OPCODES_INVALID ; invalid size
+
+OPCODES_SHIFTING_SIZES_B:
+    MOVE.L  #1, D4
+    BRA OPCODES_SHIFTING_SIZES_END
+
+OPCODES_SHIFTING_SIZES_W:
+    MOVE.L  #2, D4
+    BRA OPCODES_SHIFTING_SIZES_END
+
+OPCODES_SHIFTING_SIZES_L:
+    MOVE.L  #3, D4
+    BRA OPCODES_SHIFTING_SIZES_END
+
+OPCODES_SHIFTING_SIZES_END:
+    LEA Name_Move, A4
+    JSR IO_PRINT_OPCODES ; A4 pointing to the op name, D4 contains op size
     JSR EFFECTIVEADDRESS
     BRA OPCODES_END
 
