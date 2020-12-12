@@ -747,6 +747,17 @@ Name_Ble    DC.B    'BLE',0
 Name_Beq    DC.B    'BEQ',0
 Name_Bra    DC.B    'BRA',0
 Name_Moveq    DC.B    'MOVEQ',0
+Name_Or    DC.B    'OR',0
+Name_Sub    DC.B    'SUB',0
+Name_And    DC.B    'And',0
+Name_Add    DC.B    'ADD',0
+Name_Adda    DC.B    'ADDA',0
+Name_Lsl    DC.B    'LSL',0
+Name_Lsr    DC.B    'LSR',0
+Name_Asl    DC.B    'ASL',0
+Name_Asr    DC.B    'ASR',0
+Name_Rol    DC.B    'ROL',0
+Name_Ror    DC.B    'ROR',0
 ;Name_    DC.B    '',0 for copypasta
 Name_RawInvalid DS.B    5 ; 4bytes for opcodes hex chars + 1 byte for null = 3
 
