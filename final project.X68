@@ -350,7 +350,40 @@ JSR OPCODES
 *   - D4 contains size (0 for ignore, 1 for Byte, 2 for Word, 3 for Long
 *-----------------------------------------------------------
 IO_PRINT_OPCODES:
-    ; TODO: something...
+    MOVEM.L ALL_REG, -(SP) ; store current register state
+    
+    MOVEA.L A4, A1
+    MOVE.B  #14, D0
+    TRAP    #15
+    
+    CMP.L   #1, D4
+    BEQ IO_PRINT_OPCODES_SIZE_B
+    
+    CMP.L   #2, D4
+    BEQ IO_PRINT_OPCODES_SIZE_W
+    
+    CMP.L   #3, D4
+    BEQ IO_PRINT_OPCODES_SIZE_L
+    
+    BRA IO_PRINT_OPCODES_SIZE_END ; don't print
+    
+IO_PRINT_OPCODES_SIZE_B:
+    LEA byteOp, A1
+    MOVE.B  #14, D0
+    TRAP    #15   
+
+IO_PRINT_OPCODES_SIZE_W:
+    LEA wordOp, A1
+    MOVE.B  #14, D0
+    TRAP    #15
+    
+IO_PRINT_OPCODES_SIZE_L:
+    LEA longOp, A1
+    MOVE.B  #14, D0
+    TRAP    #15
+    
+IO_PRINT_OPCODES_SIZE_END:    
+    MOVEM.L (SP)+, ALL_REG ; restore saved register state
     RTS
 * end of IO
 
@@ -2596,7 +2629,9 @@ LINE_COUNTER    DC.B    0
 
 
 *~Font name~Courier New~
+
+
+*~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
 *~Tab size~4~
-
